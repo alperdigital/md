@@ -336,58 +336,123 @@
             CURRENT_PAGE.displayName = displayName;
             
             fetch(`/${file === 'index' ? '' : file}.md`)
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Dosya bulunamadı');
+                    }
+                    return response.text();
+                })
                 .then(content => {
-                    // Front matter'i kaldır
-                    const contentMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
-                    let bodyContent = contentMatch ? contentMatch[1] : content;
-                    bodyContent = bodyContent.trim();
-                    
-                    // HTML etiketlerini parse et ve sadece metin içeriğini çıkar
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = bodyContent;
-                    
-                    // Sadece metin içeriğini al (HTML etiketleri olmadan)
-                    let textContent = extractTextContent(tempDiv);
-                    
-                    document.getElementById('pageContent').value = textContent;
-                    document.getElementById('editTitle').textContent = `${displayName} Sayfasını Düzenle`;
-                    document.getElementById('pageGrid').style.display = 'none';
-                    document.getElementById('editForm').classList.add('active');
+                    try {
+                        // Front matter'i kaldır
+                        const contentMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
+                        let bodyContent = contentMatch ? contentMatch[1] : content;
+                        bodyContent = bodyContent.trim();
+                        
+                        if (!bodyContent) {
+                            document.getElementById('pageContent').value = '';
+                            document.getElementById('editTitle').textContent = `${displayName} Sayfasını Düzenle`;
+                            document.getElementById('pageGrid').style.display = 'none';
+                            document.getElementById('editForm').classList.add('active');
+                            return;
+                        }
+                        
+                        // HTML etiketlerini parse et ve sadece metin içeriğini çıkar
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = bodyContent;
+                        
+                        // Sadece metin içeriğini al (HTML etiketleri olmadan)
+                        let textContent = extractTextContent(tempDiv);
+                        
+                        // Eğer metin çıkarılamadıysa, sadece textContent kullan
+                        if (!textContent || textContent.trim().length === 0) {
+                            textContent = tempDiv.textContent || tempDiv.innerText || '';
+                        }
+                        
+                        document.getElementById('pageContent').value = textContent.trim();
+                        document.getElementById('editTitle').textContent = `${displayName} Sayfasını Düzenle`;
+                        document.getElementById('pageGrid').style.display = 'none';
+                        document.getElementById('editForm').classList.add('active');
+                    } catch (parseError) {
+                        console.error('Parse hatası:', parseError);
+                        // Hata durumunda sadece text content göster
+                        const tempDiv = document.createElement('div');
+                        const contentMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
+                        const bodyContent = contentMatch ? contentMatch[1] : content;
+                        tempDiv.innerHTML = bodyContent;
+                        document.getElementById('pageContent').value = (tempDiv.textContent || tempDiv.innerText || '').trim();
+                        document.getElementById('editTitle').textContent = `${displayName} Sayfasını Düzenle`;
+                        document.getElementById('pageGrid').style.display = 'none';
+                        document.getElementById('editForm').classList.add('active');
+                    }
                 })
                 .catch(error => {
-                    alert('Sayfa yüklenirken hata oluştu. Dosya mevcut olmayabilir.');
+                    console.error('Yükleme hatası:', error);
+                    alert('Sayfa yüklenirken hata oluştu: ' + error.message);
                 });
         }
         
         function extractTextContent(element) {
             let text = '';
-            for (let node of element.childNodes) {
+            
+            function processNode(node) {
                 if (node.nodeType === 3) { // Text node
-                    text += node.textContent;
+                    const textContent = node.textContent.trim();
+                    if (textContent) {
+                        text += textContent + ' ';
+                    }
                 } else if (node.nodeType === 1) { // Element node
-                    const tagName = node.tagName.toLowerCase();
+                    const tagName = node.tagName ? node.tagName.toLowerCase() : '';
                     const nodeText = node.textContent.trim();
                     
-                    if (nodeText) {
-                        if (tagName === 'h1' || tagName === 'h2' || tagName === 'h3') {
-                            text += nodeText + '\n\n';
-                        } else if (tagName === 'p') {
-                            text += nodeText + '\n\n';
-                        } else if (tagName === 'ul' || tagName === 'ol') {
-                            const items = node.querySelectorAll('li');
+                    if (!nodeText) return;
+                    
+                    // Özel durumlar
+                    if (tagName === 'script' || tagName === 'style') {
+                        return; // Script ve style'ı atla
+                    }
+                    
+                    if (tagName === 'h1' || tagName === 'h2' || tagName === 'h3' || tagName === 'h4' || tagName === 'h5' || tagName === 'h6') {
+                        text += '\n\n' + nodeText + '\n\n';
+                    } else if (tagName === 'p') {
+                        text += nodeText + '\n\n';
+                    } else if (tagName === 'ul' || tagName === 'ol') {
+                        const items = node.querySelectorAll('li');
+                        if (items.length > 0) {
                             items.forEach(li => {
-                                text += '• ' + li.textContent.trim() + '\n';
+                                const liText = li.textContent.trim();
+                                if (liText) {
+                                    text += '• ' + liText + '\n';
+                                }
                             });
                             text += '\n';
-                        } else if (tagName === 'li') {
-                            text += '• ' + nodeText + '\n';
-                        } else {
-                            text += nodeText + '\n';
+                        }
+                    } else if (tagName === 'li') {
+                        // Liste öğesi - parent ul/ol zaten handle edecek
+                        return;
+                    } else if (tagName === 'div' && node.classList && (node.classList.contains('page-content') || node.classList.contains('hero-section') || node.classList.contains('cards-grid'))) {
+                        // İçeriği recursive olarak işle
+                        for (let child of node.childNodes) {
+                            processNode(child);
+                        }
+                    } else {
+                        // Diğer elementler için recursive işle
+                        for (let child of node.childNodes) {
+                            processNode(child);
                         }
                     }
                 }
             }
+            
+            // Tüm child node'ları işle
+            for (let node of element.childNodes) {
+                processNode(node);
+            }
+            
+            // Fazla boşlukları temizle
+            text = text.replace(/\n{3,}/g, '\n\n');
+            text = text.replace(/[ \t]+/g, ' ');
+            
             return text.trim();
         }
         
@@ -409,9 +474,11 @@
             const htmlContent = convertTextToHTML(textContent);
             
             // Front matter ile birlikte dosyayı oluştur
+            // Özel karakterleri escape et
+            const safeTitle = CURRENT_PAGE.name.replace(/"/g, '\\"');
             const frontMatter = `---
 layout: default
-title: ${CURRENT_PAGE.name}
+title: ${safeTitle}
 ${CURRENT_PAGE.file !== 'index' ? `permalink: /${CURRENT_PAGE.file}/\n` : ''}---
 
 ${htmlContent}
@@ -481,61 +548,80 @@ ${htmlContent}
             }
         }
         
+        function escapeHTML(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
         function convertTextToHTML(text) {
             // Metni satırlara böl
             const lines = text.split('\n');
             let html = '<div class="page-content">\n';
             let inList = false;
+            let currentParagraph = '';
+            
+            function closeList() {
+                if (inList) {
+                    html += '    </ul>\n';
+                    inList = false;
+                }
+            }
+            
+            function closeParagraph() {
+                if (currentParagraph.trim()) {
+                    html += `    <p>${escapeHTML(currentParagraph.trim())}</p>\n`;
+                    currentParagraph = '';
+                }
+            }
             
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
                 
                 if (!line) {
-                    if (inList) {
-                        html += '</ul>\n';
-                        inList = false;
-                    }
+                    closeList();
+                    closeParagraph();
                     continue;
                 }
                 
-                // Başlık kontrolü (satır başında # varsa veya büyük harfle başlıyorsa)
+                // Başlık kontrolü
                 if (line.startsWith('# ')) {
-                    if (inList) {
-                        html += '</ul>\n';
-                        inList = false;
-                    }
-                    html += `    <h1>${line.substring(2)}</h1>\n`;
+                    closeList();
+                    closeParagraph();
+                    html += `    <h1>${escapeHTML(line.substring(2))}</h1>\n`;
                 } else if (line.startsWith('## ')) {
-                    if (inList) {
-                        html += '</ul>\n';
-                        inList = false;
-                    }
-                    html += `    <h2>${line.substring(3)}</h2>\n`;
+                    closeList();
+                    closeParagraph();
+                    html += `    <h2>${escapeHTML(line.substring(3))}</h2>\n`;
                 } else if (line.startsWith('### ')) {
-                    if (inList) {
-                        html += '</ul>\n';
-                        inList = false;
-                    }
-                    html += `    <h3>${line.substring(4)}</h3>\n`;
-                } else if (line.startsWith('• ') || line.startsWith('- ')) {
+                    closeList();
+                    closeParagraph();
+                    html += `    <h3>${escapeHTML(line.substring(4))}</h3>\n`;
+                } else if (line.startsWith('#### ')) {
+                    closeList();
+                    closeParagraph();
+                    html += `    <h4>${escapeHTML(line.substring(5))}</h4>\n`;
+                } else if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
+                    closeParagraph();
                     if (!inList) {
                         html += '    <ul>\n';
                         inList = true;
                     }
                     const itemText = line.substring(2).trim();
-                    html += `        <li>${itemText}</li>\n`;
+                    html += `        <li>${escapeHTML(itemText)}</li>\n`;
                 } else {
-                    if (inList) {
-                        html += '</ul>\n';
-                        inList = false;
+                    closeList();
+                    // Paragraf biriktir
+                    if (currentParagraph) {
+                        currentParagraph += ' ' + line;
+                    } else {
+                        currentParagraph = line;
                     }
-                    html += `    <p>${line}</p>\n`;
                 }
             }
             
-            if (inList) {
-                html += '</ul>\n';
-            }
+            closeList();
+            closeParagraph();
             
             html += '</div>';
             return html;
