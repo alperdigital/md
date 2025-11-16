@@ -1,15 +1,15 @@
 source "https://rubygems.org"
 
-# GitHub Pages için gerekli gemler
-gem "github-pages", group: :jekyll_plugins
-
-# Jekyll
-gem "jekyll"
+# Jekyll (daha uyumlu versiyon)
+gem "jekyll", "~> 3.9"
 
 # GitHub Pages tarafından desteklenen pluginler
-gem "jekyll-feed"
-gem "jekyll-sitemap"
-gem "jekyll-seo-tag"
+gem "jekyll-feed", "~> 0.12"
+gem "jekyll-sitemap", "~> 1.4"
+gem "jekyll-seo-tag", "~> 2.6"
 
-# Windows için gerekli
+# Tema
+gem "jekyll-theme-minimal"
+
+# Windows için gerekli (sadece Windows'ta yüklenecek)
 gem "wdm", "~> 0.1.1", :platforms => [:mingw, :x64_mingw, :mswin]

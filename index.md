@@ -3,31 +3,39 @@ layout: default
 title: Ana Sayfa
 ---
 
-# Hoş Geldiniz!
+<div class="hero">
+    <h1>Hoş Geldiniz</h1>
+    <p>Modern ve kullanıcı dostu bir deneyim için tasarlanmış web sitesi</p>
+</div>
 
-Bu, Jekyll ile oluşturulmuş ve GitHub Pages üzerinde barındırılan bir web sitesidir.
-
-## Hakkımda
-
-Bu site, Jekyll static site generator kullanılarak oluşturulmuştur. GitHub Pages ile ücretsiz olarak barındırılmaktadır.
-
-## Özellikler
-
-- ✅ Modern ve temiz tasarım
-- ✅ Mobil uyumlu
-- ✅ Hızlı yükleme
-- ✅ SEO dostu
-- ✅ GitHub Pages entegrasyonu
-
-## Blog Yazıları
-
-Son blog yazılarımı görmek için [Blog](/blog) sayfasını ziyaret edebilirsiniz.
-
-## İletişim
-
-Sorularınız veya önerileriniz için benimle iletişime geçebilirsiniz.
-
----
-
-**Not:** Bu site sürekli geliştirilmektedir. Yeni özellikler ve içerikler yakında eklenecektir.
-
+<div class="cards-grid">
+    <a href="{{ '/1' | relative_url }}" class="card">
+        <h2>1</h2>
+        <p>Birinci bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+    </a>
+    
+    <a href="{{ '/2' | relative_url }}" class="card">
+        <h2>2</h2>
+        <p>İkinci bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+    </a>
+    
+    <a href="{{ '/3' | relative_url }}" class="card">
+        <h2>3</h2>
+        <p>Üçüncü bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+    </a>
+    
+    <a href="{{ '/4' | relative_url }}" class="card">
+        <h2>4</h2>
+        <p>Dördüncü bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+    </a>
+    
+    <a href="{{ '/5' | relative_url }}" class="card">
+        <h2>5</h2>
+        <p>Beşinci bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+    </a>
+    
+    <a href="{{ '/6' | relative_url }}" class="card">
+        <h2>6</h2>
+        <p>Altıncı bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+    </a>
+</div>

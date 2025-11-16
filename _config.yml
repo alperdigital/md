@@ -14,8 +14,8 @@ lang: tr
 locale: tr_TR
 
 # Tema Ayarları
-# GitHub Pages desteklenen temalar: minima, cayman, architect, dinky, hacker, leap-day, merlot, midnight, minimal, modernist, slate, tactile, time-machine
-theme: jekyll-theme-minimal
+# Özel layout kullanılıyor, tema ayarı kaldırıldı
+# theme: jekyll-theme-minimal
 
 # GitHub Pages için gerekli pluginler
 plugins:

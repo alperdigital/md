@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: 'tr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+    <meta name="description" content="{{ page.description | default: site.description }}">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+    
+    <!-- SEO -->
+    {% seo %}
+    
+    <!-- Feed -->
+    {% feed_meta %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="{{ '/' | relative_url }}" class="{% if page.url == '/' %}active{% endif %}">Ana Sayfa</a></li>
+                <li><a href="{{ '/1' | relative_url }}" class="{% if page.url == '/1/' %}active{% endif %}">1</a></li>
+                <li><a href="{{ '/2' | relative_url }}" class="{% if page.url == '/2/' %}active{% endif %}">2</a></li>
+                <li><a href="{{ '/3' | relative_url }}" class="{% if page.url == '/3/' %}active{% endif %}">3</a></li>
+                <li><a href="{{ '/4' | relative_url }}" class="{% if page.url == '/4/' %}active{% endif %}">4</a></li>
+                <li><a href="{{ '/5' | relative_url }}" class="{% if page.url == '/5/' %}active{% endif %}">5</a></li>
+                <li><a href="{{ '/6' | relative_url }}" class="{% if page.url == '/6/' %}active{% endif %}">6</a></li>
+            </ul>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            {{ content }}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; {{ 'now' | date: "%Y" }} {{ site.title }}. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.nav-toggle')?.addEventListener('click', function() {
+            document.querySelector('.nav-menu')?.classList.toggle('active');
+            this.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
+
