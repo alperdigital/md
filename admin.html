@@ -549,7 +549,7 @@
                 tabBtn.textContent = section.name;
                 tabBtn.onclick = (e) => {
                     e.preventDefault();
-                    switchTab(section.id);
+                    switchTab(section.id, e.target);
                 };
                 tabsDiv.appendChild(tabBtn);
                 
@@ -651,7 +651,7 @@
                 tabBtn.textContent = `${index + 1}. ${sectionName}`;
                 tabBtn.onclick = (e) => {
                     e.preventDefault();
-                    switchTab(`section-${index}`);
+                    switchTab(`section-${index}`, e.target);
                 };
                 tabsDiv.appendChild(tabBtn);
                 
@@ -690,14 +690,24 @@
             });
         }
         
-        function switchTab(tabId) {
+        function switchTab(tabId, clickedElement) {
             // Tüm sekmeleri ve içerikleri gizle
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.section-content').forEach(content => content.classList.remove('active'));
             
-            // Seçili sekmeyi ve içeriği göster
-            const clickedBtn = event.target;
-            clickedBtn.classList.add('active');
+            // Seçili sekmeyi aktif et
+            if (clickedElement) {
+                clickedElement.classList.add('active');
+            } else {
+                // Eğer element verilmemişse, tabId'ye göre bul
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    if (btn.onclick && btn.textContent.includes(tabId)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            
+            // İlgili içeriği göster
             const targetContent = document.getElementById(`section-${tabId}`);
             if (targetContent) {
                 targetContent.classList.add('active');
