@@ -277,8 +277,8 @@
                 
                 <div class="form-group">
                     <label for="pageContent">Sayfa İçeriği</label>
-                    <textarea id="pageContent" placeholder="Sayfa içeriğinizi buraya yazın...&#10;&#10;Not: HTML etiketleri kullanabilirsiniz. Örnek:&#10;&lt;h2&gt;Başlık&lt;/h2&gt;&#10;&lt;p&gt;Paragraf&lt;/p&gt;&#10;&lt;ul&gt;&lt;li&gt;Liste öğesi&lt;/li&gt;&lt;/ul&gt;"></textarea>
-                    <div class="help-text">💡 HTML etiketleri kullanabilirsiniz. Başlık için &lt;h2&gt;, paragraf için &lt;p&gt;, liste için &lt;ul&gt; ve &lt;li&gt; kullanın.</div>
+                    <textarea id="pageContent" placeholder="Sayfa içeriğinizi buraya yazın...&#10;&#10;Örnek:&#10;Başlık&#10;&#10;Bu bir paragraf metnidir.&#10;&#10;• Liste öğesi 1&#10;• Liste öğesi 2&#10;• Liste öğesi 3"></textarea>
+                    <div class="help-text">💡 Sadece metin yazın. Başlıklar için satır başına #, liste için • veya - kullanın. HTML etiketleri gerekmez!</div>
                 </div>
                 
                 <div class="button-group">
@@ -338,14 +338,19 @@
             fetch(`/${file === 'index' ? '' : file}.md`)
                 .then(response => response.text())
                 .then(content => {
-                    // Front matter'i kaldır ve sadece içeriği al
+                    // Front matter'i kaldır
                     const contentMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
                     let bodyContent = contentMatch ? contentMatch[1] : content;
-                    
-                    // HTML etiketlerini temizle (sadece içerik kalsın)
                     bodyContent = bodyContent.trim();
                     
-                    document.getElementById('pageContent').value = bodyContent;
+                    // HTML etiketlerini parse et ve sadece metin içeriğini çıkar
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = bodyContent;
+                    
+                    // Sadece metin içeriğini al (HTML etiketleri olmadan)
+                    let textContent = extractTextContent(tempDiv);
+                    
+                    document.getElementById('pageContent').value = textContent;
                     document.getElementById('editTitle').textContent = `${displayName} Sayfasını Düzenle`;
                     document.getElementById('pageGrid').style.display = 'none';
                     document.getElementById('editForm').classList.add('active');
@@ -355,19 +360,53 @@
                 });
         }
         
+        function extractTextContent(element) {
+            let text = '';
+            for (let node of element.childNodes) {
+                if (node.nodeType === 3) { // Text node
+                    text += node.textContent;
+                } else if (node.nodeType === 1) { // Element node
+                    const tagName = node.tagName.toLowerCase();
+                    const nodeText = node.textContent.trim();
+                    
+                    if (nodeText) {
+                        if (tagName === 'h1' || tagName === 'h2' || tagName === 'h3') {
+                            text += nodeText + '\n\n';
+                        } else if (tagName === 'p') {
+                            text += nodeText + '\n\n';
+                        } else if (tagName === 'ul' || tagName === 'ol') {
+                            const items = node.querySelectorAll('li');
+                            items.forEach(li => {
+                                text += '• ' + li.textContent.trim() + '\n';
+                            });
+                            text += '\n';
+                        } else if (tagName === 'li') {
+                            text += '• ' + nodeText + '\n';
+                        } else {
+                            text += nodeText + '\n';
+                        }
+                    }
+                }
+            }
+            return text.trim();
+        }
+        
         function backToPanel() {
             document.getElementById('editForm').classList.remove('active');
             document.getElementById('pageGrid').style.display = 'grid';
         }
         
         async function savePage() {
-            const content = document.getElementById('pageContent').value.trim();
+            const textContent = document.getElementById('pageContent').value.trim();
             const messageDiv = document.getElementById('saveMessage');
             
-            if (!content) {
+            if (!textContent) {
                 messageDiv.innerHTML = '<div class="error">❌ İçerik boş olamaz!</div>';
                 return;
             }
+            
+            // Metni HTML'e çevir
+            const htmlContent = convertTextToHTML(textContent);
             
             // Front matter ile birlikte dosyayı oluştur
             const frontMatter = `---
@@ -375,7 +414,7 @@ layout: default
 title: ${CURRENT_PAGE.name}
 ${CURRENT_PAGE.file !== 'index' ? `permalink: /${CURRENT_PAGE.file}/\n` : ''}---
 
-${content}
+${htmlContent}
 `;
             
             messageDiv.innerHTML = '<div class="success">⏳ Kaydediliyor...</div>';
@@ -440,6 +479,66 @@ ${content}
                 const error = await updateResponse.json();
                 throw new Error(error.message || 'GitHub API hatası');
             }
+        }
+        
+        function convertTextToHTML(text) {
+            // Metni satırlara böl
+            const lines = text.split('\n');
+            let html = '<div class="page-content">\n';
+            let inList = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (!line) {
+                    if (inList) {
+                        html += '</ul>\n';
+                        inList = false;
+                    }
+                    continue;
+                }
+                
+                // Başlık kontrolü (satır başında # varsa veya büyük harfle başlıyorsa)
+                if (line.startsWith('# ')) {
+                    if (inList) {
+                        html += '</ul>\n';
+                        inList = false;
+                    }
+                    html += `    <h1>${line.substring(2)}</h1>\n`;
+                } else if (line.startsWith('## ')) {
+                    if (inList) {
+                        html += '</ul>\n';
+                        inList = false;
+                    }
+                    html += `    <h2>${line.substring(3)}</h2>\n`;
+                } else if (line.startsWith('### ')) {
+                    if (inList) {
+                        html += '</ul>\n';
+                        inList = false;
+                    }
+                    html += `    <h3>${line.substring(4)}</h3>\n`;
+                } else if (line.startsWith('• ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        html += '    <ul>\n';
+                        inList = true;
+                    }
+                    const itemText = line.substring(2).trim();
+                    html += `        <li>${itemText}</li>\n`;
+                } else {
+                    if (inList) {
+                        html += '</ul>\n';
+                        inList = false;
+                    }
+                    html += `    <p>${line}</p>\n`;
+                }
+            }
+            
+            if (inList) {
+                html += '</ul>\n';
+            }
+            
+            html += '</div>';
+            return html;
         }
         
         function downloadFile(content, messageDiv) {
