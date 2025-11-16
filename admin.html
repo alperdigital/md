@@ -547,7 +547,10 @@
                 const tabBtn = document.createElement('button');
                 tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
                 tabBtn.textContent = section.name;
-                tabBtn.onclick = () => switchTab(section.id);
+                tabBtn.onclick = (e) => {
+                    e.preventDefault();
+                    switchTab(section.id);
+                };
                 tabsDiv.appendChild(tabBtn);
                 
                 const content = document.createElement('div');
@@ -646,7 +649,10 @@
                 const tabBtn = document.createElement('button');
                 tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
                 tabBtn.textContent = `${index + 1}. ${sectionName}`;
-                tabBtn.onclick = () => switchTab(`section-${index}`);
+                tabBtn.onclick = (e) => {
+                    e.preventDefault();
+                    switchTab(`section-${index}`);
+                };
                 tabsDiv.appendChild(tabBtn);
                 
                 const content = document.createElement('div');
@@ -690,8 +696,12 @@
             document.querySelectorAll('.section-content').forEach(content => content.classList.remove('active'));
             
             // Seçili sekmeyi ve içeriği göster
-            event.target.classList.add('active');
-            document.getElementById(`section-${tabId}`).classList.add('active');
+            const clickedBtn = event.target;
+            clickedBtn.classList.add('active');
+            const targetContent = document.getElementById(`section-${tabId}`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
         }
         
         function addListItem(sectionIndex) {
