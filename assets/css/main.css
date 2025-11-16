@@ -260,10 +260,12 @@ body {
 }
 
 .gradient-text {
-    background: var(--red-gradient-2);
+    background: linear-gradient(135deg, #ffffff 0%, #fecaca 50%, #fca5a5 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: white; /* Fallback for older browsers */
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
 }
 
 .hero-description {
@@ -413,8 +415,8 @@ body {
 
 .card-modern:hover {
     transform: translateY(-12px) scale(1.02);
-    box-shadow: var(--shadow-xl), var(--shadow-red);
-    border-color: var(--primary-red-light);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 15px 30px rgba(220, 38, 38, 0.4);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .card-icon {
@@ -547,15 +549,19 @@ body {
     .nav-menu {
         position: fixed;
         left: -100%;
-        top: 70px;
+        top: 0;
+        height: 100vh;
         flex-direction: column;
-        background: var(--primary-red);
+        background: rgba(220, 38, 38, 0.98);
+        backdrop-filter: blur(20px);
         width: 100%;
         text-align: center;
         transition: 0.3s;
         box-shadow: var(--shadow-lg);
-        padding: 2rem 0;
+        padding: 5rem 0 2rem;
         gap: 0;
+        z-index: 999;
+        overflow-y: auto;
     }
 
     .nav-menu.active {
@@ -574,6 +580,19 @@ body {
 
     .nav-toggle {
         display: flex;
+        z-index: 1001;
+    }
+    
+    .nav-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+    
+    .nav-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+    
+    .nav-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -6px);
     }
 
     .hero-section {
@@ -641,13 +660,29 @@ body {
 
 /* Links */
 a {
-    color: var(--primary-red);
+    color: #fca5a5;
     text-decoration: none;
     transition: color 0.3s;
 }
 
 a:hover {
-    color: var(--primary-red-dark);
+    color: #f87171;
+    text-decoration: underline;
+}
+
+/* Card links should not have underline */
+.card-modern,
+.card-modern:hover {
+    text-decoration: none;
+}
+
+/* Page content links */
+.page-content a {
+    color: #fca5a5;
+}
+
+.page-content a:hover {
+    color: #f87171;
 }
 
 /* Code blocks */
