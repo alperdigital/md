@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Ana Sayfa
+title: ŞİMDİ
 ---
 
 <div class="hero-section">
@@ -42,55 +42,46 @@ title: Ana Sayfa
 
 <div class="cards-grid">
     <a href="{{ '/1' | relative_url }}" class="card card-modern">
-        <div class="card-icon">1</div>
+        <div class="card-icon">ON</div>
         <div class="card-content">
-            <h3>Bölüm 1</h3>
-            <p>Birinci bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+            <h3>ONLAR</h3>
+            <p>ONLAR bölümü içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
         </div>
         <div class="card-arrow">→</div>
     </a>
     
     <a href="{{ '/2' | relative_url }}" class="card card-modern">
-        <div class="card-icon">2</div>
+        <div class="card-icon">MA</div>
         <div class="card-content">
-            <h3>Bölüm 2</h3>
-            <p>İkinci bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+            <h3>MANŞET</h3>
+            <p>MANŞET bölümü içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
         </div>
         <div class="card-arrow">→</div>
     </a>
     
     <a href="{{ '/3' | relative_url }}" class="card card-modern">
-        <div class="card-icon">3</div>
+        <div class="card-icon">YA</div>
         <div class="card-content">
-            <h3>Bölüm 3</h3>
-            <p>Üçüncü bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+            <h3>YAYIN</h3>
+            <p>YAYIN bölümü içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
         </div>
         <div class="card-arrow">→</div>
     </a>
     
     <a href="{{ '/4' | relative_url }}" class="card card-modern">
-        <div class="card-icon">4</div>
+        <div class="card-icon">KA</div>
         <div class="card-content">
-            <h3>Bölüm 4</h3>
-            <p>Dördüncü bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+            <h3>KARARLAR</h3>
+            <p>KARARLAR bölümü içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
         </div>
         <div class="card-arrow">→</div>
     </a>
     
     <a href="{{ '/5' | relative_url }}" class="card card-modern">
-        <div class="card-icon">5</div>
+        <div class="card-icon">İL</div>
         <div class="card-content">
-            <h3>Bölüm 5</h3>
-            <p>Beşinci bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
-        </div>
-        <div class="card-arrow">→</div>
-    </a>
-    
-    <a href="{{ '/6' | relative_url }}" class="card card-modern">
-        <div class="card-icon">6</div>
-        <div class="card-content">
-            <h3>Bölüm 6</h3>
-            <p>Altıncı bölüm içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
+            <h3>İLETİŞİM</h3>
+            <p>İLETİŞİM bölümü içeriği burada yer alacak. Detaylı bilgi için tıklayın.</p>
         </div>
         <div class="card-arrow">→</div>
     </a>
