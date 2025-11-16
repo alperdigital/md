@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Şimdi Onlar Manşet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(220, 38, 38, 0.3);
+        }
+        
+        .login-form {
+            text-align: center;
+        }
+        
+        .admin-form {
+            display: none;
+        }
+        
+        .admin-form.active {
+            display: block;
+        }
+        
+        h1 {
+            color: #fca5a5;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 2px solid rgba(220, 38, 38, 0.3);
+            background: #0f172a;
+            color: #f1f5f9;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #dc2626;
+        }
+        
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.4);
+        }
+        
+        .error {
+            color: #f87171;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(220, 38, 38, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+        
+        .success {
+            color: #86efac;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .page-list {
+            margin-top: 2rem;
+        }
+        
+        .page-item {
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 2px solid rgba(220, 38, 38, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-item:hover {
+            border-color: #dc2626;
+            transform: translateX(5px);
+        }
+        
+        .page-item h3 {
+            color: #fca5a5;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-item p {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn {
+            background: rgba(220, 38, 38, 0.2);
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Login Form -->
+        <div class="login-form" id="loginForm">
+            <h1>🔐 Admin Girişi</h1>
+            <div class="form-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" placeholder="Şifrenizi girin" autocomplete="off">
+            </div>
+            <button onclick="login()">Giriş Yap</button>
+            <div id="loginError" class="error" style="display: none;"></div>
+        </div>
+        
+        <!-- Admin Panel -->
+        <div class="admin-form" id="adminPanel">
+            <h1>📝 Admin Panel</h1>
+            
+            <div class="page-list">
+                <div class="page-item" onclick="loadPage('index', 'Ana Sayfa')">
+                    <h3>Ana Sayfa (ŞİMDİ)</h3>
+                    <p>index.md dosyasını düzenle</p>
+                </div>
+                <div class="page-item" onclick="loadPage('1', 'ONLAR')">
+                    <h3>ONLAR</h3>
+                    <p>1.md dosyasını düzenle</p>
+                </div>
+                <div class="page-item" onclick="loadPage('2', 'MANŞET')">
+                    <h3>MANŞET</h3>
+                    <p>2.md dosyasını düzenle</p>
+                </div>
+                <div class="page-item" onclick="loadPage('3', 'YAYIN')">
+                    <h3>YAYIN</h3>
+                    <p>3.md dosyasını düzenle</p>
+                </div>
+                <div class="page-item" onclick="loadPage('4', 'KARARLAR')">
+                    <h3>KARARLAR</h3>
+                    <p>4.md dosyasını düzenle</p>
+                </div>
+                <div class="page-item" onclick="loadPage('5', 'İLETİŞİM')">
+                    <h3>İLETİŞİM</h3>
+                    <p>5.md dosyasını düzenle</p>
+                </div>
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">Çıkış Yap</button>
+        </div>
+        
+        <!-- Edit Form -->
+        <div class="admin-form" id="editForm">
+            <h1 id="editTitle">Sayfa Düzenle</h1>
+            <div class="form-group">
+                <label for="pageContent">İçerik (Markdown)</label>
+                <textarea id="pageContent" placeholder="Markdown içeriği buraya yazın..."></textarea>
+            </div>
+            <button onclick="savePage()">💾 Kaydet</button>
+            <button class="logout-btn" onclick="backToPanel()">← Geri</button>
+            <div id="saveMessage"></div>
+        </div>
+    </div>
+    
+    <script src="admin-config.js"></script>
+    <script>
+        // Şifre admin-config.js dosyasından alınır
+        const ADMIN_PASSWORD = ADMIN_CONFIG.password;
+        const CURRENT_PAGE = { file: null, name: null };
+        
+        // Sayfa yüklendiğinde kontrol et
+        window.onload = function() {
+            if (localStorage.getItem('adminLoggedIn') === 'true') {
+                showAdminPanel();
+            }
+        };
+        
+        function login() {
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (password === ADMIN_PASSWORD) {
+                localStorage.setItem('adminLoggedIn', 'true');
+                showAdminPanel();
+                errorDiv.style.display = 'none';
+            } else {
+                errorDiv.textContent = '❌ Hatalı şifre!';
+                errorDiv.style.display = 'block';
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminPanel').classList.remove('active');
+            document.getElementById('editForm').classList.remove('active');
+            document.getElementById('password').value = '';
+        }
+        
+        function showAdminPanel() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('active');
+            document.getElementById('editForm').classList.remove('active');
+        }
+        
+        function loadPage(file, name) {
+            CURRENT_PAGE.file = file;
+            CURRENT_PAGE.name = name;
+            
+            // Sayfa içeriğini yükle
+            fetch(`/${file === 'index' ? '' : file}.md`)
+                .then(response => response.text())
+                .then(content => {
+                    // Front matter'i kaldır
+                    const contentMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
+                    const bodyContent = contentMatch ? contentMatch[1] : content;
+                    
+                    document.getElementById('pageContent').value = bodyContent.trim();
+                    document.getElementById('editTitle').textContent = `${name} Düzenle`;
+                    document.getElementById('adminPanel').classList.remove('active');
+                    document.getElementById('editForm').classList.add('active');
+                })
+                .catch(error => {
+                    alert('Sayfa yüklenirken hata oluştu. Dosya mevcut olmayabilir.');
+                });
+        }
+        
+        function backToPanel() {
+            document.getElementById('editForm').classList.remove('active');
+            document.getElementById('adminPanel').classList.add('active');
+        }
+        
+        async function savePage() {
+            const content = document.getElementById('pageContent').value;
+            const messageDiv = document.getElementById('saveMessage');
+            
+            // Front matter ekle
+            const frontMatter = `---
+layout: default
+title: ${CURRENT_PAGE.name}
+${CURRENT_PAGE.file !== 'index' ? `permalink: /${CURRENT_PAGE.file}/\n` : ''}---
+
+${content}
+`;
+            
+            messageDiv.innerHTML = '<div class="success">⏳ Kaydediliyor...</div>';
+            
+            // GitHub API ile kaydetmeyi dene
+            if (ADMIN_CONFIG.githubToken) {
+                try {
+                    await saveToGitHub(frontMatter);
+                    messageDiv.innerHTML = '<div class="success">✅ Başarıyla kaydedildi! Değişiklikler birkaç dakika içinde yansıyacak.</div>';
+                } catch (error) {
+                    console.error('GitHub API hatası:', error);
+                    downloadFile(frontMatter, messageDiv);
+                }
+            } else {
+                // Token yoksa dosya indir
+                downloadFile(frontMatter, messageDiv);
+            }
+        }
+        
+        async function saveToGitHub(content) {
+            const fileName = `${CURRENT_PAGE.file === 'index' ? 'index' : CURRENT_PAGE.file}.md`;
+            const path = fileName;
+            
+            // Önce dosyanın mevcut SHA'sını al
+            const getFileResponse = await fetch(
+                `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}?ref=${ADMIN_CONFIG.githubBranch}`,
+                {
+                    headers: {
+                        'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                }
+            );
+            
+            let sha = null;
+            if (getFileResponse.ok) {
+                const fileData = await getFileResponse.json();
+                sha = fileData.sha;
+            }
+            
+            // Dosyayı güncelle
+            const updateResponse = await fetch(
+                `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Admin panel: ${CURRENT_PAGE.name} sayfası güncellendi`,
+                        content: btoa(unescape(encodeURIComponent(content))),
+                        branch: ADMIN_CONFIG.githubBranch,
+                        sha: sha
+                    })
+                }
+            );
+            
+            if (!updateResponse.ok) {
+                throw new Error('GitHub API hatası');
+            }
+        }
+        
+        function downloadFile(content, messageDiv) {
+            const fileName = `${CURRENT_PAGE.file === 'index' ? 'index' : CURRENT_PAGE.file}.md`;
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            messageDiv.innerHTML = '<div class="success">✅ Dosya indirildi! Lütfen dosyayı proje klasörüne kopyalayın ve GitHub\'a push edin.<br><small>💡 GitHub API token ekleyerek doğrudan kaydedebilirsiniz.</small></div>';
+        }
+    </script>
+</body>
+</html>
+
