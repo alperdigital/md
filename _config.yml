@@ -1,0 +1,67 @@
+# Site Ayarları
+title: "Benim Jekyll Sitem"
+email: ""
+description: >-
+  Jekyll ile oluşturulmuş kişisel blog ve proje sitesi.
+  GitHub Pages üzerinde barındırılmaktadır.
+baseurl: "" # site alt yolu, örn: /blog
+url: "https://alperdigital.github.io" # GitHub Pages URL'iniz
+twitter_username: ""
+github_username: alperdigital
+
+# Dil Ayarları
+lang: tr
+locale: tr_TR
+
+# Tema Ayarları
+# GitHub Pages desteklenen temalar: minima, cayman, architect, dinky, hacker, leap-day, merlot, midnight, minimal, modernist, slate, tactile, time-machine
+theme: jekyll-theme-minimal
+
+# GitHub Pages için gerekli pluginler
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Markdown İşlemci
+markdown: kramdown
+highlighter: rouge
+
+# İçerik Ayarları
+show_excerpts: true
+paginate: 5
+paginate_path: "/sayfa:num/"
+
+# Sosyal Medya
+social:
+  name: Alper Digital
+  links:
+    - https://github.com/alperdigital
+
+# İşleme dışı bırakılacak dosyalar
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - .sass-cache/
+  - .jekyll-cache/
+  - .jekyll-metadata
+  - benchmark/
+  - features/
+  - lib/
+  - script/
+  - test/
+  - docs/
+  - rake/
+  - rubocop/
+  - History.markdown
+  - jekyll.gemspec
+  - Rakefile
+  - Earthfile
+  - LICENSE
+  - README.markdown
+
