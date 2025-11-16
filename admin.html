@@ -19,7 +19,7 @@
         }
         
         .admin-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         
@@ -30,6 +30,8 @@
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
             border: 2px solid rgba(220, 38, 38, 0.3);
             text-align: center;
+            max-width: 500px;
+            margin: 5rem auto;
         }
         
         .admin-panel {
@@ -119,6 +121,44 @@
             display: block;
         }
         
+        .section-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid rgba(220, 38, 38, 0.3);
+            padding-bottom: 1rem;
+        }
+        
+        .tab-btn {
+            background: rgba(220, 38, 38, 0.1);
+            color: #fca5a5;
+            border: 2px solid rgba(220, 38, 38, 0.3);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(220, 38, 38, 0.2);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            border-color: #dc2626;
+        }
+        
+        .section-content {
+            display: none;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -148,7 +188,7 @@
         }
         
         textarea {
-            min-height: 300px;
+            min-height: 120px;
             resize: vertical;
             line-height: 1.6;
         }
@@ -221,6 +261,25 @@
         .back-btn:hover {
             background: rgba(220, 38, 38, 0.1);
         }
+        
+        .card-item {
+            background: #0f172a;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 2px solid rgba(220, 38, 38, 0.2);
+        }
+        
+        .card-item h4 {
+            color: #fca5a5;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -244,29 +303,29 @@
             </div>
             
             <div class="page-grid" id="pageGrid">
-                <div class="page-card" onclick="loadPage('index', 'ŞİMDİ', 'Ana Sayfa')">
-                    <h3>📄 Ana Sayfa</h3>
-                    <p>ŞİMDİ sayfasının içeriğini düzenle</p>
+                <div class="page-card" onclick="loadPage('index')">
+                    <h3>📄 Ana Sayfa (ŞİMDİ)</h3>
+                    <p>Ana sayfa içeriğini düzenle</p>
                 </div>
-                <div class="page-card" onclick="loadPage('1', 'ONLAR', 'ONLAR')">
+                <div class="page-card" onclick="loadPage('1')">
                     <h3>📄 ONLAR</h3>
-                    <p>ONLAR sayfasının içeriğini düzenle</p>
+                    <p>ONLAR sayfasını düzenle</p>
                 </div>
-                <div class="page-card" onclick="loadPage('2', 'MANŞET', 'MANŞET')">
+                <div class="page-card" onclick="loadPage('2')">
                     <h3>📄 MANŞET</h3>
-                    <p>MANŞET sayfasının içeriğini düzenle</p>
+                    <p>MANŞET sayfasını düzenle</p>
                 </div>
-                <div class="page-card" onclick="loadPage('3', 'YAYIN', 'YAYIN')">
+                <div class="page-card" onclick="loadPage('3')">
                     <h3>📄 YAYIN</h3>
-                    <p>YAYIN sayfasının içeriğini düzenle</p>
+                    <p>YAYIN sayfasını düzenle</p>
                 </div>
-                <div class="page-card" onclick="loadPage('4', 'KARARLAR', 'KARARLAR')">
+                <div class="page-card" onclick="loadPage('4')">
                     <h3>📄 KARARLAR</h3>
-                    <p>KARARLAR sayfasının içeriğini düzenle</p>
+                    <p>KARARLAR sayfasını düzenle</p>
                 </div>
-                <div class="page-card" onclick="loadPage('5', 'İLETİŞİM', 'İLETİŞİM')">
+                <div class="page-card" onclick="loadPage('5')">
                     <h3>📄 İLETİŞİM</h3>
-                    <p>İLETİŞİM sayfasının içeriğini düzenle</p>
+                    <p>İLETİŞİM sayfasını düzenle</p>
                 </div>
             </div>
             
@@ -275,14 +334,12 @@
                 <button class="back-btn" onclick="backToPanel()">← Geri Dön</button>
                 <h1 id="editTitle">Sayfa Düzenle</h1>
                 
-                <div class="form-group">
-                    <label for="pageContent">Sayfa İçeriği</label>
-                    <textarea id="pageContent" placeholder="Sayfa içeriğinizi buraya yazın...&#10;&#10;Örnek:&#10;Başlık&#10;&#10;Bu bir paragraf metnidir.&#10;&#10;• Liste öğesi 1&#10;• Liste öğesi 2&#10;• Liste öğesi 3"></textarea>
-                    <div class="help-text">💡 Sadece metin yazın. Başlıklar için satır başına #, liste için • veya - kullanın. HTML etiketleri gerekmez!</div>
-                </div>
+                <!-- Sekmeler buraya dinamik olarak eklenecek -->
+                <div id="sectionTabs"></div>
+                <div id="sectionContents"></div>
                 
                 <div class="button-group">
-                    <button onclick="savePage()">💾 Kaydet</button>
+                    <button onclick="savePage()">💾 Tüm Değişiklikleri Kaydet</button>
                     <button class="btn-secondary" onclick="backToPanel()">İptal</button>
                 </div>
                 
@@ -294,7 +351,7 @@
     <script src="admin-config.js"></script>
     <script>
         const ADMIN_PASSWORD = ADMIN_CONFIG.password;
-        const CURRENT_PAGE = { file: null, name: null, displayName: null };
+        const CURRENT_PAGE = { file: null, name: null, displayName: null, data: {} };
         
         window.onload = function() {
             if (localStorage.getItem('adminLoggedIn') === 'true') {
@@ -330,10 +387,20 @@
             document.getElementById('pageGrid').style.display = 'grid';
         }
         
-        function loadPage(file, name, displayName) {
+        function loadPage(file) {
             CURRENT_PAGE.file = file;
-            CURRENT_PAGE.name = name;
-            CURRENT_PAGE.displayName = displayName;
+            
+            const pageNames = {
+                'index': { name: 'ŞİMDİ', display: 'Ana Sayfa' },
+                '1': { name: 'ONLAR', display: 'ONLAR' },
+                '2': { name: 'MANŞET', display: 'MANŞET' },
+                '3': { name: 'YAYIN', display: 'YAYIN' },
+                '4': { name: 'KARARLAR', display: 'KARARLAR' },
+                '5': { name: 'İLETİŞİM', display: 'İLETİŞİM' }
+            };
+            
+            CURRENT_PAGE.name = pageNames[file].name;
+            CURRENT_PAGE.displayName = pageNames[file].display;
             
             fetch(`/${file === 'index' ? '' : file}.md`)
                 .then(response => {
@@ -343,48 +410,10 @@
                     return response.text();
                 })
                 .then(content => {
-                    try {
-                        // Front matter'i kaldır
-                        const contentMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
-                        let bodyContent = contentMatch ? contentMatch[1] : content;
-                        bodyContent = bodyContent.trim();
-                        
-                        if (!bodyContent) {
-                            document.getElementById('pageContent').value = '';
-                            document.getElementById('editTitle').textContent = `${displayName} Sayfasını Düzenle`;
-                            document.getElementById('pageGrid').style.display = 'none';
-                            document.getElementById('editForm').classList.add('active');
-                            return;
-                        }
-                        
-                        // HTML etiketlerini parse et ve sadece metin içeriğini çıkar
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = bodyContent;
-                        
-                        // Sadece metin içeriğini al (HTML etiketleri olmadan)
-                        let textContent = extractTextContent(tempDiv);
-                        
-                        // Eğer metin çıkarılamadıysa, sadece textContent kullan
-                        if (!textContent || textContent.trim().length === 0) {
-                            textContent = tempDiv.textContent || tempDiv.innerText || '';
-                        }
-                        
-                        document.getElementById('pageContent').value = textContent.trim();
-                        document.getElementById('editTitle').textContent = `${displayName} Sayfasını Düzenle`;
-                        document.getElementById('pageGrid').style.display = 'none';
-                        document.getElementById('editForm').classList.add('active');
-                    } catch (parseError) {
-                        console.error('Parse hatası:', parseError);
-                        // Hata durumunda sadece text content göster
-                        const tempDiv = document.createElement('div');
-                        const contentMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
-                        const bodyContent = contentMatch ? contentMatch[1] : content;
-                        tempDiv.innerHTML = bodyContent;
-                        document.getElementById('pageContent').value = (tempDiv.textContent || tempDiv.innerText || '').trim();
-                        document.getElementById('editTitle').textContent = `${displayName} Sayfasını Düzenle`;
-                        document.getElementById('pageGrid').style.display = 'none';
-                        document.getElementById('editForm').classList.add('active');
-                    }
+                    parsePageContent(content, file);
+                    renderEditForm(file);
+                    document.getElementById('pageGrid').style.display = 'none';
+                    document.getElementById('editForm').classList.add('active');
                 })
                 .catch(error => {
                     console.error('Yükleme hatası:', error);
@@ -392,68 +421,289 @@
                 });
         }
         
-        function extractTextContent(element) {
-            let text = '';
+        function parsePageContent(content, file) {
+            // Front matter'i kaldır
+            const contentMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
+            let bodyContent = contentMatch ? contentMatch[1] : content;
+            bodyContent = bodyContent.trim();
             
-            function processNode(node) {
-                if (node.nodeType === 3) { // Text node
-                    const textContent = node.textContent.trim();
-                    if (textContent) {
-                        text += textContent + ' ';
-                    }
-                } else if (node.nodeType === 1) { // Element node
-                    const tagName = node.tagName ? node.tagName.toLowerCase() : '';
-                    const nodeText = node.textContent.trim();
+            if (file === 'index') {
+                parseIndexPage(bodyContent);
+            } else {
+                parseRegularPage(bodyContent);
+            }
+        }
+        
+        function parseIndexPage(html) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            // Hero Section
+            const heroSection = tempDiv.querySelector('.hero-section');
+            if (heroSection) {
+                const heroContent = heroSection.querySelector('.hero-content');
+                if (heroContent) {
+                    CURRENT_PAGE.data.heroBadge = heroContent.querySelector('.hero-badge')?.textContent.trim() || '';
+                    const heroTitle = heroContent.querySelector('.hero-title');
+                    CURRENT_PAGE.data.heroTitle = heroTitle?.textContent.replace(/\s+/g, ' ').trim() || '';
+                    CURRENT_PAGE.data.heroDescription = heroContent.querySelector('.hero-description')?.textContent.trim() || '';
                     
-                    if (!nodeText) return;
+                    // Stats
+                    const stats = heroContent.querySelectorAll('.stat-item');
+                    CURRENT_PAGE.data.stats = [];
+                    stats.forEach(stat => {
+                        CURRENT_PAGE.data.stats.push({
+                            number: stat.querySelector('.stat-number')?.textContent.trim() || '',
+                            label: stat.querySelector('.stat-label')?.textContent.trim() || ''
+                        });
+                    });
+                }
+            }
+            
+            // Section Header
+            const sectionHeader = tempDiv.querySelector('.section-header');
+            if (sectionHeader) {
+                CURRENT_PAGE.data.sectionTitle = sectionHeader.querySelector('h2')?.textContent.trim() || '';
+                CURRENT_PAGE.data.sectionDescription = sectionHeader.querySelector('p')?.textContent.trim() || '';
+            }
+            
+            // Cards
+            const cards = tempDiv.querySelectorAll('.card-modern');
+            CURRENT_PAGE.data.cards = [];
+            cards.forEach((card, index) => {
+                const icon = card.querySelector('.card-icon')?.textContent.trim() || '';
+                const title = card.querySelector('.card-content h3')?.textContent.trim() || '';
+                const description = card.querySelector('.card-content p')?.textContent.trim() || '';
+                CURRENT_PAGE.data.cards.push({ icon, title, description, index });
+            });
+        }
+        
+        function parseRegularPage(html) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            const pageContent = tempDiv.querySelector('.page-content');
+            if (!pageContent) {
+                CURRENT_PAGE.data.sections = [{ type: 'content', html: html }];
+                return;
+            }
+            
+            CURRENT_PAGE.data.sections = [];
+            let currentSection = null;
+            
+            for (let node of pageContent.childNodes) {
+                if (node.nodeType === 1) { // Element
+                    const tagName = node.tagName.toLowerCase();
                     
-                    // Özel durumlar
-                    if (tagName === 'script' || tagName === 'style') {
-                        return; // Script ve style'ı atla
-                    }
-                    
-                    if (tagName === 'h1' || tagName === 'h2' || tagName === 'h3' || tagName === 'h4' || tagName === 'h5' || tagName === 'h6') {
-                        text += '\n\n' + nodeText + '\n\n';
+                    if (tagName === 'h1') {
+                        if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+                        currentSection = { type: 'heading1', text: node.textContent.trim() };
+                    } else if (tagName === 'h2') {
+                        if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+                        currentSection = { type: 'heading2', text: node.textContent.trim() };
                     } else if (tagName === 'p') {
-                        text += nodeText + '\n\n';
+                        if (currentSection && currentSection.type === 'paragraph') {
+                            currentSection.text += '\n\n' + node.textContent.trim();
+                        } else {
+                            if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+                            currentSection = { type: 'paragraph', text: node.textContent.trim() };
+                        }
                     } else if (tagName === 'ul' || tagName === 'ol') {
+                        if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
                         const items = node.querySelectorAll('li');
-                        if (items.length > 0) {
-                            items.forEach(li => {
-                                const liText = li.textContent.trim();
-                                if (liText) {
-                                    text += '• ' + liText + '\n';
-                                }
-                            });
-                            text += '\n';
-                        }
-                    } else if (tagName === 'li') {
-                        // Liste öğesi - parent ul/ol zaten handle edecek
-                        return;
-                    } else if (tagName === 'div' && node.classList && (node.classList.contains('page-content') || node.classList.contains('hero-section') || node.classList.contains('cards-grid'))) {
-                        // İçeriği recursive olarak işle
-                        for (let child of node.childNodes) {
-                            processNode(child);
-                        }
-                    } else {
-                        // Diğer elementler için recursive işle
-                        for (let child of node.childNodes) {
-                            processNode(child);
-                        }
+                        const listItems = Array.from(items).map(li => li.textContent.trim());
+                        currentSection = { type: 'list', items: listItems };
                     }
                 }
             }
             
-            // Tüm child node'ları işle
-            for (let node of element.childNodes) {
-                processNode(node);
+            if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+        }
+        
+        function renderEditForm(file) {
+            document.getElementById('editTitle').textContent = `${CURRENT_PAGE.displayName} Sayfasını Düzenle`;
+            
+            const tabsDiv = document.getElementById('sectionTabs');
+            const contentsDiv = document.getElementById('sectionContents');
+            
+            tabsDiv.innerHTML = '';
+            contentsDiv.innerHTML = '';
+            
+            if (file === 'index') {
+                renderIndexForm(tabsDiv, contentsDiv);
+            } else {
+                renderRegularForm(tabsDiv, contentsDiv);
+            }
+        }
+        
+        function renderIndexForm(tabsDiv, contentsDiv) {
+            const sections = [
+                { id: 'hero', name: 'Hero Bölümü' },
+                { id: 'section-header', name: 'Keşfet Bölümü' },
+                { id: 'cards', name: 'Kartlar' }
+            ];
+            
+            sections.forEach((section, index) => {
+                const tabBtn = document.createElement('button');
+                tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+                tabBtn.textContent = section.name;
+                tabBtn.onclick = () => switchTab(section.id);
+                tabsDiv.appendChild(tabBtn);
+                
+                const content = document.createElement('div');
+                content.id = `section-${section.id}`;
+                content.className = `section-content ${index === 0 ? 'active' : ''}`;
+                
+                if (section.id === 'hero') {
+                    content.innerHTML = `
+                        <div class="form-group">
+                            <label>Hero Badge (Üst Etiket)</label>
+                            <input type="text" id="heroBadge" value="${CURRENT_PAGE.data.heroBadge || ''}" placeholder="Hoş Geldiniz">
+                        </div>
+                        <div class="form-group">
+                            <label>Hero Başlık</label>
+                            <input type="text" id="heroTitle" value="${CURRENT_PAGE.data.heroTitle || ''}" placeholder="Modern Deneyim">
+                        </div>
+                        <div class="form-group">
+                            <label>Hero Açıklama</label>
+                            <textarea id="heroDescription" placeholder="Açıklama metni...">${CURRENT_PAGE.data.heroDescription || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>İstatistikler</label>
+                            <div class="stat-group">
+                                <div>
+                                    <label style="font-size: 0.85rem;">İstatistik 1 - Sayı</label>
+                                    <input type="text" id="stat1Number" value="${CURRENT_PAGE.data.stats?.[0]?.number || ''}" placeholder="6">
+                                    <label style="font-size: 0.85rem; margin-top: 0.5rem;">İstatistik 1 - Etiket</label>
+                                    <input type="text" id="stat1Label" value="${CURRENT_PAGE.data.stats?.[0]?.label || ''}" placeholder="Bölüm">
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.85rem;">İstatistik 2 - Sayı</label>
+                                    <input type="text" id="stat2Number" value="${CURRENT_PAGE.data.stats?.[1]?.number || ''}" placeholder="100%">
+                                    <label style="font-size: 0.85rem; margin-top: 0.5rem;">İstatistik 2 - Etiket</label>
+                                    <input type="text" id="stat2Label" value="${CURRENT_PAGE.data.stats?.[1]?.label || ''}" placeholder="Modern">
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.85rem;">İstatistik 3 - Sayı</label>
+                                    <input type="text" id="stat3Number" value="${CURRENT_PAGE.data.stats?.[2]?.number || ''}" placeholder="∞">
+                                    <label style="font-size: 0.85rem; margin-top: 0.5rem;">İstatistik 3 - Etiket</label>
+                                    <input type="text" id="stat3Label" value="${CURRENT_PAGE.data.stats?.[2]?.label || ''}" placeholder="Olasılık">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (section.id === 'section-header') {
+                    content.innerHTML = `
+                        <div class="form-group">
+                            <label>Başlık</label>
+                            <input type="text" id="sectionTitle" value="${CURRENT_PAGE.data.sectionTitle || ''}" placeholder="Keşfet">
+                        </div>
+                        <div class="form-group">
+                            <label>Açıklama</label>
+                            <textarea id="sectionDescription" placeholder="Açıklama metni...">${CURRENT_PAGE.data.sectionDescription || ''}</textarea>
+                        </div>
+                    `;
+                } else if (section.id === 'cards') {
+                    const cardsHtml = (CURRENT_PAGE.data.cards || []).map((card, index) => `
+                        <div class="card-item">
+                            <h4>Kart ${index + 1}: ${card.title || 'Kart'}</h4>
+                            <div class="form-group">
+                                <label>İkon (2 harf)</label>
+                                <input type="text" id="card${index}Icon" value="${card.icon || ''}" placeholder="ON" maxlength="2">
+                            </div>
+                            <div class="form-group">
+                                <label>Başlık</label>
+                                <input type="text" id="card${index}Title" value="${card.title || ''}" placeholder="ONLAR">
+                            </div>
+                            <div class="form-group">
+                                <label>Açıklama</label>
+                                <textarea id="card${index}Description" placeholder="Açıklama...">${card.description || ''}</textarea>
+                            </div>
+                        </div>
+                    `).join('');
+                    content.innerHTML = cardsHtml || '<p style="color: #cbd5e1;">Kart bulunamadı</p>';
+                }
+                
+                contentsDiv.appendChild(content);
+            });
+        }
+        
+        function renderRegularForm(tabsDiv, contentsDiv) {
+            const sections = CURRENT_PAGE.data.sections || [];
+            
+            if (sections.length === 0) {
+                tabsDiv.innerHTML = '<p style="color: #cbd5e1;">İçerik bulunamadı</p>';
+                contentsDiv.innerHTML = '<div class="section-content active"><p style="color: #cbd5e1;">Sayfa boş</p></div>';
+                return;
             }
             
-            // Fazla boşlukları temizle
-            text = text.replace(/\n{3,}/g, '\n\n');
-            text = text.replace(/[ \t]+/g, ' ');
+            sections.forEach((section, index) => {
+                const sectionName = section.type === 'heading1' ? 'Ana Başlık' :
+                                   section.type === 'heading2' ? 'Alt Başlık' :
+                                   section.type === 'paragraph' ? 'Paragraf' :
+                                   section.type === 'list' ? 'Liste' : 'İçerik';
+                
+                const tabBtn = document.createElement('button');
+                tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+                tabBtn.textContent = `${index + 1}. ${sectionName}`;
+                tabBtn.onclick = () => switchTab(`section-${index}`);
+                tabsDiv.appendChild(tabBtn);
+                
+                const content = document.createElement('div');
+                content.id = `section-${index}`;
+                content.className = `section-content ${index === 0 ? 'active' : ''}`;
+                
+                if (section.type === 'heading1' || section.type === 'heading2') {
+                    content.innerHTML = `
+                        <div class="form-group">
+                            <label>Başlık</label>
+                            <input type="text" id="section${index}Text" value="${section.text || ''}" placeholder="Başlık">
+                        </div>
+                    `;
+                } else if (section.type === 'paragraph') {
+                    content.innerHTML = `
+                        <div class="form-group">
+                            <label>Paragraf Metni</label>
+                            <textarea id="section${index}Text" placeholder="Paragraf metni...">${section.text || ''}</textarea>
+                        </div>
+                    `;
+                } else if (section.type === 'list') {
+                    const itemsHtml = (section.items || []).map((item, itemIndex) => `
+                        <div class="form-group">
+                            <label>Liste Öğesi ${itemIndex + 1}</label>
+                            <input type="text" id="section${index}Item${itemIndex}" value="${item}" placeholder="Liste öğesi">
+                        </div>
+                    `).join('');
+                    content.innerHTML = `
+                        ${itemsHtml}
+                        <button class="btn-secondary" onclick="addListItem(${index})" style="margin-top: 1rem;">+ Liste Öğesi Ekle</button>
+                    `;
+                }
+                
+                contentsDiv.appendChild(content);
+            });
+        }
+        
+        function switchTab(tabId) {
+            // Tüm sekmeleri ve içerikleri gizle
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.section-content').forEach(content => content.classList.remove('active'));
             
-            return text.trim();
+            // Seçili sekmeyi ve içeriği göster
+            event.target.classList.add('active');
+            document.getElementById(`section-${tabId}`).classList.add('active');
+        }
+        
+        function addListItem(sectionIndex) {
+            const section = document.getElementById(`section-${sectionIndex}`);
+            const newItemDiv = document.createElement('div');
+            newItemDiv.className = 'form-group';
+            const itemCount = section.querySelectorAll('.form-group input').length;
+            newItemDiv.innerHTML = `
+                <label>Liste Öğesi ${itemCount + 1}</label>
+                <input type="text" id="section${sectionIndex}Item${itemCount}" placeholder="Liste öğesi">
+            `;
+            section.insertBefore(newItemDiv, section.lastElementChild);
         }
         
         function backToPanel() {
@@ -462,46 +712,161 @@
         }
         
         async function savePage() {
-            const textContent = document.getElementById('pageContent').value.trim();
             const messageDiv = document.getElementById('saveMessage');
+            messageDiv.innerHTML = '<div class="success">⏳ Kaydediliyor...</div>';
             
-            if (!textContent) {
-                messageDiv.innerHTML = '<div class="error">❌ İçerik boş olamaz!</div>';
-                return;
-            }
-            
-            // Metni HTML'e çevir
-            const htmlContent = convertTextToHTML(textContent);
-            
-            // Front matter ile birlikte dosyayı oluştur
-            // Özel karakterleri escape et
-            const safeTitle = CURRENT_PAGE.name.replace(/"/g, '\\"');
-            const frontMatter = `---
+            try {
+                let htmlContent = '';
+                
+                if (CURRENT_PAGE.file === 'index') {
+                    htmlContent = buildIndexHTML();
+                } else {
+                    htmlContent = buildRegularPageHTML();
+                }
+                
+                const frontMatter = `---
 layout: default
-title: ${safeTitle}
+title: ${CURRENT_PAGE.name}
 ${CURRENT_PAGE.file !== 'index' ? `permalink: /${CURRENT_PAGE.file}/\n` : ''}---
 
 ${htmlContent}
 `;
-            
-            messageDiv.innerHTML = '<div class="success">⏳ Kaydediliyor...</div>';
-            
-            // GitHub API ile kaydetmeyi dene
-            if (ADMIN_CONFIG.githubToken) {
-                try {
-                    await saveToGitHub(frontMatter);
-                    messageDiv.innerHTML = '<div class="success">✅ Başarıyla kaydedildi! Değişiklikler birkaç dakika içinde sitede görünecek.</div>';
-                    setTimeout(() => {
-                        backToPanel();
-                        messageDiv.innerHTML = '';
-                    }, 3000);
-                } catch (error) {
-                    console.error('GitHub API hatası:', error);
+                
+                if (ADMIN_CONFIG.githubToken) {
+                    try {
+                        await saveToGitHub(frontMatter);
+                        messageDiv.innerHTML = '<div class="success">✅ Başarıyla kaydedildi! Değişiklikler birkaç dakika içinde sitede görünecek.</div>';
+                        setTimeout(() => {
+                            backToPanel();
+                            messageDiv.innerHTML = '';
+                        }, 3000);
+                    } catch (error) {
+                        console.error('GitHub API hatası:', error);
+                        downloadFile(frontMatter, messageDiv);
+                    }
+                } else {
                     downloadFile(frontMatter, messageDiv);
                 }
-            } else {
-                downloadFile(frontMatter, messageDiv);
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="error">❌ Hata: ${error.message}</div>`;
             }
+        }
+        
+        function buildIndexHTML() {
+            const heroBadge = document.getElementById('heroBadge')?.value || 'Hoş Geldiniz';
+            const heroTitle = document.getElementById('heroTitle')?.value || 'Modern Deneyim';
+            const heroDescription = document.getElementById('heroDescription')?.value || '';
+            const sectionTitle = document.getElementById('sectionTitle')?.value || 'Keşfet';
+            const sectionDescription = document.getElementById('sectionDescription')?.value || '';
+            
+            const stat1Number = document.getElementById('stat1Number')?.value || '6';
+            const stat1Label = document.getElementById('stat1Label')?.value || 'Bölüm';
+            const stat2Number = document.getElementById('stat2Number')?.value || '100%';
+            const stat2Label = document.getElementById('stat2Label')?.value || 'Modern';
+            const stat3Number = document.getElementById('stat3Number')?.value || '∞';
+            const stat3Label = document.getElementById('stat3Label')?.value || 'Olasılık';
+            
+            const cards = [];
+            for (let i = 0; i < 5; i++) {
+                const icon = document.getElementById(`card${i}Icon`)?.value || '';
+                const title = document.getElementById(`card${i}Title`)?.value || '';
+                const description = document.getElementById(`card${i}Description`)?.value || '';
+                if (title) {
+                    cards.push({ icon, title, description, index: i + 1 });
+                }
+            }
+            
+            const cardLinks = ['1', '2', '3', '4', '5'];
+            
+            let html = `<div class="hero-section">
+    <div class="hero-content">
+        <div class="hero-badge">${escapeHTML(heroBadge)}</div>
+        <h1 class="hero-title">
+            <span class="gradient-text">${escapeHTML(heroTitle)}</span>
+        </h1>
+        <p class="hero-description">
+            ${escapeHTML(heroDescription)}
+        </p>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-number">${escapeHTML(stat1Number)}</div>
+                <div class="stat-label">${escapeHTML(stat1Label)}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">${escapeHTML(stat2Number)}</div>
+                <div class="stat-label">${escapeHTML(stat2Label)}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">${escapeHTML(stat3Number)}</div>
+                <div class="stat-label">${escapeHTML(stat3Label)}</div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-background">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+</div>
+
+<div class="section-header">
+    <h2>${escapeHTML(sectionTitle)}</h2>
+    <p>${escapeHTML(sectionDescription)}</p>
+</div>
+
+<div class="cards-grid">
+`;
+            
+            cards.forEach((card, index) => {
+                html += `    <a href="{{ '/${cardLinks[index]}' | relative_url }}" class="card card-modern">
+        <div class="card-icon">${escapeHTML(card.icon)}</div>
+        <div class="card-content">
+            <h3>${escapeHTML(card.title)}</h3>
+            <p>${escapeHTML(card.description)}</p>
+        </div>
+        <div class="card-arrow">→</div>
+    </a>
+`;
+            });
+            
+            html += `</div>`;
+            return html;
+        }
+        
+        function buildRegularPageHTML() {
+            let html = '<div class="page-content">\n';
+            
+            const sections = CURRENT_PAGE.data.sections || [];
+            sections.forEach((section, index) => {
+                const textInput = document.getElementById(`section${index}Text`);
+                const text = textInput ? textInput.value : section.text || '';
+                
+                if (section.type === 'heading1') {
+                    html += `    <h1>${escapeHTML(text)}</h1>\n\n`;
+                } else if (section.type === 'heading2') {
+                    html += `    <h2>${escapeHTML(text)}</h2>\n\n`;
+                } else if (section.type === 'paragraph') {
+                    html += `    <p>${escapeHTML(text)}</p>\n\n`;
+                } else if (section.type === 'list') {
+                    html += '    <ul>\n';
+                    for (let i = 0; i < 20; i++) {
+                        const itemInput = document.getElementById(`section${index}Item${i}`);
+                        if (itemInput && itemInput.value) {
+                            html += `        <li>${escapeHTML(itemInput.value)}</li>\n`;
+                        }
+                    }
+                    html += '    </ul>\n\n';
+                }
+            });
+            
+            html += '</div>';
+            return html;
+        }
+        
+        function escapeHTML(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
         
         async function saveToGitHub(content) {
@@ -546,85 +911,6 @@ ${htmlContent}
                 const error = await updateResponse.json();
                 throw new Error(error.message || 'GitHub API hatası');
             }
-        }
-        
-        function escapeHTML(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        function convertTextToHTML(text) {
-            // Metni satırlara böl
-            const lines = text.split('\n');
-            let html = '<div class="page-content">\n';
-            let inList = false;
-            let currentParagraph = '';
-            
-            function closeList() {
-                if (inList) {
-                    html += '    </ul>\n';
-                    inList = false;
-                }
-            }
-            
-            function closeParagraph() {
-                if (currentParagraph.trim()) {
-                    html += `    <p>${escapeHTML(currentParagraph.trim())}</p>\n`;
-                    currentParagraph = '';
-                }
-            }
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                
-                if (!line) {
-                    closeList();
-                    closeParagraph();
-                    continue;
-                }
-                
-                // Başlık kontrolü
-                if (line.startsWith('# ')) {
-                    closeList();
-                    closeParagraph();
-                    html += `    <h1>${escapeHTML(line.substring(2))}</h1>\n`;
-                } else if (line.startsWith('## ')) {
-                    closeList();
-                    closeParagraph();
-                    html += `    <h2>${escapeHTML(line.substring(3))}</h2>\n`;
-                } else if (line.startsWith('### ')) {
-                    closeList();
-                    closeParagraph();
-                    html += `    <h3>${escapeHTML(line.substring(4))}</h3>\n`;
-                } else if (line.startsWith('#### ')) {
-                    closeList();
-                    closeParagraph();
-                    html += `    <h4>${escapeHTML(line.substring(5))}</h4>\n`;
-                } else if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
-                    closeParagraph();
-                    if (!inList) {
-                        html += '    <ul>\n';
-                        inList = true;
-                    }
-                    const itemText = line.substring(2).trim();
-                    html += `        <li>${escapeHTML(itemText)}</li>\n`;
-                } else {
-                    closeList();
-                    // Paragraf biriktir
-                    if (currentParagraph) {
-                        currentParagraph += ' ' + line;
-                    } else {
-                        currentParagraph = line;
-                    }
-                }
-            }
-            
-            closeList();
-            closeParagraph();
-            
-            html += '</div>';
-            return html;
         }
         
         function downloadFile(content, messageDiv) {
