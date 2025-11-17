@@ -1355,8 +1355,47 @@ ${htmlContent}
             
             // Haberleri yükle
             let haberler = [];
+            
+            // Önce LocalStorage'dan yükle (en güncel)
             try {
-                // Önce assets/haberler.json'dan yükle
+                const localData = localStorage.getItem('haberler_local');
+                if (localData) {
+                    haberler = JSON.parse(localData);
+                    CURRENT_PAGE.data.haberler = haberler;
+                    renderHaberList();
+                    // Arka planda GitHub'dan da yükle (senkronizasyon için)
+                    loadHaberlerFromGitHub();
+                    return;
+                }
+            } catch (e) {
+                console.error('LocalStorage okuma hatası:', e);
+            }
+            
+            try {
+                // LocalStorage yoksa GitHub'dan veya dosyadan yükle
+                if (ADMIN_CONFIG.githubToken) {
+                    const ghResponse = await fetch(
+                        `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/_data/haberler.json?ref=${ADMIN_CONFIG.githubBranch}`,
+                        {
+                            headers: {
+                                'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        }
+                    );
+                    if (ghResponse.ok) {
+                        const fileData = await ghResponse.json();
+                        const content = decodeURIComponent(escape(atob(fileData.content)));
+                        haberler = JSON.parse(content);
+                        // LocalStorage'a da kaydet
+                        localStorage.setItem('haberler_local', JSON.stringify(haberler));
+                        CURRENT_PAGE.data.haberler = haberler;
+                        renderHaberList();
+                        return;
+                    }
+                }
+                
+                // Fallback: Jekyll sunucusundan yükle
                 let response = await fetch('/assets/haberler.json');
                 if (!response.ok) {
                     // Fallback: _data/haberler.json'dan dene
