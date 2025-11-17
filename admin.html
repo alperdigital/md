@@ -543,18 +543,23 @@
                 const warningDiv = document.createElement('div');
                 warningDiv.className = 'github-warning';
                 warningDiv.innerHTML = `
-                    <div style="background: rgba(220, 38, 38, 0.1); border: 2px solid rgba(220, 38, 38, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                        <h3 style="color: #fca5a5; margin-bottom: 1rem;">⚠️ GitHub Token Gerekli</h3>
-                        <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 1rem;">
-                            Anında yayınlama özelliğini kullanmak için GitHub Personal Access Token eklemeniz gerekiyor.
-                        </p>
+                    <div style="background: rgba(220, 38, 38, 0.15); border: 2px solid rgba(220, 38, 38, 0.4); border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
+                        <h3 style="color: #fca5a5; margin-bottom: 1rem; font-size: 1.5rem;">⚠️ ÖNEMLİ: GitHub Token Gerekli</h3>
+                        <div style="background: rgba(220, 38, 38, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #dc2626;">
+                            <p style="color: #fca5a5; font-weight: 600; margin-bottom: 0.5rem;">🔴 Şu anda değişiklikler sadece bu tarayıcıda görünür!</p>
+                            <p style="color: #cbd5e1; line-height: 1.6;">
+                                Admin panelinden yaptığınız değişiklikler şu anda <strong>sadece bu tarayıcıda</strong> LocalStorage'a kaydediliyor. 
+                                <strong>Tüm kullanıcıların görmesi için GitHub token eklemeniz zorunludur.</strong>
+                            </p>
+                        </div>
                         <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 1rem;">
                             <strong>📋 Yapmanız gerekenler:</strong><br>
                             1. GitHub > Settings > Developer settings > Personal access tokens<br>
                             2. Yeni token oluşturun (repo scope gerekli)<br>
-                            3. <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">admin-config.js</code> dosyasına token'ı ekleyin
+                            3. <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">admin-config.js</code> dosyasına token'ı ekleyin<br>
+                            4. Sayfayı yenileyin
                         </p>
-                        <p style="color: #94a3b8; font-size: 0.9rem;">
+                        <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 1rem;">
                             💡 Detaylı kurulum için <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ADMIN-SETUP.md</code> dosyasına bakın.
                         </p>
                     </div>
@@ -1622,11 +1627,28 @@ ${htmlContent}
                 }
             } else {
                 // GitHub token yok, sadece LocalStorage'a kaydet
-                messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi<br>🚀 Anında <a href="/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!<br><br>💡 <small>Not: Bu haberler sadece bu tarayıcıda görünür. Tüm cihazlarda görünmesi için GitHub token ekleyin.</small></div>';
+                messageDiv.innerHTML = `
+                    <div class="success">
+                        <div style="background: rgba(220, 38, 38, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #dc2626;">
+                            <p style="color: #fca5a5; font-weight: 600; margin-bottom: 0.5rem;">⚠️ ÖNEMLİ: Sadece Bu Tarayıcıda Görünür!</p>
+                            <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">
+                                Haberler LocalStorage'a kaydedildi ve <strong>sadece bu tarayıcıda</strong> görünecek. 
+                                <strong>Tüm kullanıcıların görmesi için GitHub token eklemeniz gerekiyor!</strong>
+                            </p>
+                        </div>
+                        <p>✅ <strong>Haberler kaydedildi!</strong></p>
+                        <p>💾 LocalStorage'a kaydedildi</p>
+                        <p>🚀 Anında <a href="/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek (sadece bu tarayıcıda)</p>
+                        <p style="margin-top: 1rem; color: #94a3b8; font-size: 0.9rem;">
+                            💡 <strong>Çözüm:</strong> GitHub token ekleyerek tüm kullanıcıların görmesini sağlayın. 
+                            <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ADMIN-SETUP.md</code> dosyasına bakın.
+                        </p>
+                    </div>
+                `;
                 setTimeout(() => {
                     loadHaberlerPage();
                     messageDiv.innerHTML = '';
-                }, 4000);
+                }, 6000);
             }
         }
         
@@ -2111,11 +2133,28 @@ ${htmlContent}
                 }
             } else {
                 // GitHub token yok, sadece LocalStorage'a kaydet
-                messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi<br>🚀 Anında <a href="/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!<br><br>💡 <small>Not: Bu kararlar sadece bu tarayıcıda görünür. Tüm cihazlarda görünmesi için GitHub token ekleyin.</small></div>';
+                messageDiv.innerHTML = `
+                    <div class="success">
+                        <div style="background: rgba(220, 38, 38, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #dc2626;">
+                            <p style="color: #fca5a5; font-weight: 600; margin-bottom: 0.5rem;">⚠️ ÖNEMLİ: Sadece Bu Tarayıcıda Görünür!</p>
+                            <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">
+                                Kararlar LocalStorage'a kaydedildi ve <strong>sadece bu tarayıcıda</strong> görünecek. 
+                                <strong>Tüm kullanıcıların görmesi için GitHub token eklemeniz gerekiyor!</strong>
+                            </p>
+                        </div>
+                        <p>✅ <strong>Kararlar kaydedildi!</strong></p>
+                        <p>💾 LocalStorage'a kaydedildi</p>
+                        <p>🚀 Anında <a href="/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek (sadece bu tarayıcıda)</p>
+                        <p style="margin-top: 1rem; color: #94a3b8; font-size: 0.9rem;">
+                            💡 <strong>Çözüm:</strong> GitHub token ekleyerek tüm kullanıcıların görmesini sağlayın. 
+                            <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ADMIN-SETUP.md</code> dosyasına bakın.
+                        </p>
+                    </div>
+                `;
                 setTimeout(() => {
                     loadKararlarPage();
                     messageDiv.innerHTML = '';
-                }, 4000);
+                }, 6000);
             }
         }
         
