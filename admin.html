@@ -1794,8 +1794,47 @@ ${htmlContent}
             
             // Kararları yükle
             let kararlar = [];
+            
+            // Önce LocalStorage'dan yükle (en güncel)
             try {
-                // Önce assets/kararlar.json'dan yükle
+                const localData = localStorage.getItem('kararlar_local');
+                if (localData) {
+                    kararlar = JSON.parse(localData);
+                    CURRENT_PAGE.data.kararlar = kararlar;
+                    renderKararList();
+                    // Arka planda GitHub'dan da yükle (senkronizasyon için)
+                    loadKararlarFromGitHub();
+                    return;
+                }
+            } catch (e) {
+                console.error('LocalStorage okuma hatası:', e);
+            }
+            
+            try {
+                // LocalStorage yoksa GitHub'dan veya dosyadan yükle
+                if (ADMIN_CONFIG.githubToken) {
+                    const ghResponse = await fetch(
+                        `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/_data/kararlar.json?ref=${ADMIN_CONFIG.githubBranch}`,
+                        {
+                            headers: {
+                                'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        }
+                    );
+                    if (ghResponse.ok) {
+                        const fileData = await ghResponse.json();
+                        const content = decodeURIComponent(escape(atob(fileData.content)));
+                        kararlar = JSON.parse(content);
+                        // LocalStorage'a da kaydet
+                        localStorage.setItem('kararlar_local', JSON.stringify(kararlar));
+                        CURRENT_PAGE.data.kararlar = kararlar;
+                        renderKararList();
+                        return;
+                    }
+                }
+                
+                // Fallback: Jekyll sunucusundan yükle
                 let response = await fetch('/assets/kararlar.json');
                 if (!response.ok) {
                     // Fallback: _data/kararlar.json'dan dene
@@ -1803,30 +1842,17 @@ ${htmlContent}
                 }
                 if (response.ok) {
                     kararlar = await response.json();
+                    // LocalStorage'a da kaydet
+                    localStorage.setItem('kararlar_local', JSON.stringify(kararlar));
                 } else {
-                    // Fallback: GitHub'dan yükle
-                    if (ADMIN_CONFIG.githubToken) {
-                        const ghResponse = await fetch(
-                            `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/_data/kararlar.json?ref=${ADMIN_CONFIG.githubBranch}`,
-                            {
-                                headers: {
-                                    'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
-                                    'Accept': 'application/vnd.github.v3+json'
-                                }
-                            }
-                        );
-                        if (ghResponse.ok) {
-                            const fileData = await ghResponse.json();
-                            const content = decodeURIComponent(escape(atob(fileData.content)));
-                            kararlar = JSON.parse(content);
-                        }
-                    }
+                    kararlar = [];
                 }
+                
+                CURRENT_PAGE.data.kararlar = kararlar;
             } catch (error) {
                 console.error('Kararlar yüklenirken hata:', error);
+                CURRENT_PAGE.data.kararlar = [];
             }
-            
-            CURRENT_PAGE.data.kararlar = kararlar;
             
             // Karar listesi sekmesi
             const listTab = document.createElement('button');
@@ -1841,7 +1867,7 @@ ${htmlContent}
             const listContent = document.createElement('div');
             listContent.id = 'section-karar-list';
             listContent.className = 'section-content active';
-            listContent.innerHTML = renderKararList(kararlar);
+            listContent.innerHTML = renderKararList();
             contentsDiv.appendChild(listContent);
             
             // Yeni karar ekle sekmesi
@@ -1865,7 +1891,50 @@ ${htmlContent}
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
-        function renderKararList(kararlar) {
+        // GitHub'dan kararları yükle (arka plan senkronizasyonu)
+        async function loadKararlarFromGitHub() {
+            if (!ADMIN_CONFIG.githubToken) return;
+            
+            try {
+                const ghResponse = await fetch(
+                    `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/_data/kararlar.json?ref=${ADMIN_CONFIG.githubBranch}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                if (ghResponse.ok) {
+                    const fileData = await ghResponse.json();
+                    const content = decodeURIComponent(escape(atob(fileData.content)));
+                    const githubKararlar = JSON.parse(content);
+                    
+                    // LocalStorage'daki kararlarla birleştir (local öncelikli)
+                    const localKararlar = CURRENT_PAGE.data.kararlar || [];
+                    const combined = [...localKararlar];
+                    
+                    // GitHub'daki kararları ekle (zaten yoksa)
+                    githubKararlar.forEach(ghKarar => {
+                        if (!combined.find(k => k.kararNo === ghKarar.kararNo && k.tarih === ghKarar.tarih)) {
+                            combined.push(ghKarar);
+                        }
+                    });
+                    
+                    // Tarihe göre sırala
+                    combined.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
+                    
+                    CURRENT_PAGE.data.kararlar = combined;
+                    localStorage.setItem('kararlar_local', JSON.stringify(combined));
+                    renderKararList();
+                }
+            } catch (error) {
+                console.error('GitHub senkronizasyon hatası:', error);
+            }
+        }
+        
+        function renderKararList() {
+            const kararlar = CURRENT_PAGE.data.kararlar || [];
             if (!kararlar || kararlar.length === 0) {
                 return '<div class="form-group"><p style="color: #cbd5e1; text-align: center; padding: 2rem;">Henüz karar eklenmemiş. "Yeni Karar Ekle" sekmesinden karar ekleyebilirsiniz.</p></div>';
             }
@@ -1977,6 +2046,8 @@ ${htmlContent}
         function deleteKarar(index) {
             if (confirm('Bu kararı silmek istediğinizden emin misiniz?')) {
                 CURRENT_PAGE.data.kararlar.splice(index, 1);
+                // LocalStorage'ı güncelle
+                localStorage.setItem('kararlar_local', JSON.stringify(CURRENT_PAGE.data.kararlar));
                 saveKararlar();
             }
         }
@@ -2014,20 +2085,37 @@ ${htmlContent}
             
             const jsonContent = JSON.stringify(CURRENT_PAGE.data.kararlar, null, 2);
             
+            // Her zaman LocalStorage'a kaydet (GitHub olmadan da çalışsın)
+            try {
+                localStorage.setItem('kararlar_local', jsonContent);
+                console.log('Kararlar LocalStorage\'a kaydedildi');
+            } catch (e) {
+                console.error('LocalStorage kayıt hatası:', e);
+            }
+            
             if (ADMIN_CONFIG.githubToken) {
                 try {
                     await saveKararlarToGitHub(jsonContent);
-                    messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar kaydedildi!</strong><br><br>📤 GitHub\'a push edildi.<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!</div>';
+                    messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi (anında görünür)<br>📤 GitHub\'a push edildi<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!</div>';
                     setTimeout(() => {
                         loadKararlarPage();
                         messageDiv.innerHTML = '';
                     }, 4000);
                 } catch (error) {
                     console.error('GitHub API hatası:', error);
-                    downloadKararlarFile(jsonContent, messageDiv);
+                    messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar LocalStorage\'a kaydedildi!</strong><br><br>💾 Anında <a href="/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!<br><br>⚠️ GitHub\'a kaydedilemedi, ancak LocalStorage\'da saklandı.</div>';
+                    setTimeout(() => {
+                        loadKararlarPage();
+                        messageDiv.innerHTML = '';
+                    }, 4000);
                 }
             } else {
-                downloadKararlarFile(jsonContent, messageDiv);
+                // GitHub token yok, sadece LocalStorage'a kaydet
+                messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi<br>🚀 Anında <a href="/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!<br><br>💡 <small>Not: Bu kararlar sadece bu tarayıcıda görünür. Tüm cihazlarda görünmesi için GitHub token ekleyin.</small></div>';
+                setTimeout(() => {
+                    loadKararlarPage();
+                    messageDiv.innerHTML = '';
+                }, 4000);
             }
         }
         
