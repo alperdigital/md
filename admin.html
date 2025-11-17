@@ -1557,44 +1557,47 @@ ${htmlContent}
         }
         
         async function saveHaberlerToGitHub(content) {
-            const path = '_data/haberler.json';
+            // Hem _data hem de assets klasörüne kaydet
+            const paths = ['_data/haberler.json', 'assets/haberler.json'];
             
-            const getFileResponse = await fetch(
-                `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}?ref=${ADMIN_CONFIG.githubBranch}`,
-                {
-                    headers: {
-                        'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
+            for (const path of paths) {
+                const getFileResponse = await fetch(
+                    `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}?ref=${ADMIN_CONFIG.githubBranch}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
                     }
+                );
+                
+                let sha = null;
+                if (getFileResponse.ok) {
+                    const fileData = await getFileResponse.json();
+                    sha = fileData.sha;
                 }
-            );
-            
-            let sha = null;
-            if (getFileResponse.ok) {
-                const fileData = await getFileResponse.json();
-                sha = fileData.sha;
-            }
-            
-            const updateResponse = await fetch(
-                `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: 'Admin panel: Haberler güncellendi',
-                        content: btoa(unescape(encodeURIComponent(content))),
-                        branch: ADMIN_CONFIG.githubBranch,
-                        sha: sha
-                    })
+                
+                const updateResponse = await fetch(
+                    `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Admin panel: Haberler güncellendi',
+                            content: btoa(unescape(encodeURIComponent(content))),
+                            branch: ADMIN_CONFIG.githubBranch,
+                            sha: sha
+                        })
+                    }
+                );
+                
+                if (!updateResponse.ok && getFileResponse.status !== 404) {
+                    console.warn(`${path} kaydedilemedi:`, await updateResponse.json());
                 }
-            );
-            
-            if (!updateResponse.ok) {
-                throw new Error('GitHub API hatası');
             }
         }
         
@@ -1954,44 +1957,47 @@ ${htmlContent}
         }
         
         async function saveKararlarToGitHub(content) {
-            const path = '_data/kararlar.json';
+            // Hem _data hem de assets klasörüne kaydet
+            const paths = ['_data/kararlar.json', 'assets/kararlar.json'];
             
-            const getFileResponse = await fetch(
-                `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}?ref=${ADMIN_CONFIG.githubBranch}`,
-                {
-                    headers: {
-                        'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
+            for (const path of paths) {
+                const getFileResponse = await fetch(
+                    `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}?ref=${ADMIN_CONFIG.githubBranch}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
                     }
+                );
+                
+                let sha = null;
+                if (getFileResponse.ok) {
+                    const fileData = await getFileResponse.json();
+                    sha = fileData.sha;
                 }
-            );
-            
-            let sha = null;
-            if (getFileResponse.ok) {
-                const fileData = await getFileResponse.json();
-                sha = fileData.sha;
-            }
-            
-            const updateResponse = await fetch(
-                `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: 'Admin panel: Kararlar güncellendi',
-                        content: btoa(unescape(encodeURIComponent(content))),
-                        branch: ADMIN_CONFIG.githubBranch,
-                        sha: sha
-                    })
+                
+                const updateResponse = await fetch(
+                    `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Admin panel: Kararlar güncellendi',
+                            content: btoa(unescape(encodeURIComponent(content))),
+                            branch: ADMIN_CONFIG.githubBranch,
+                            sha: sha
+                        })
+                    }
+                );
+                
+                if (!updateResponse.ok && getFileResponse.status !== 404) {
+                    console.warn(`${path} kaydedilemedi:`, await updateResponse.json());
                 }
-            );
-            
-            if (!updateResponse.ok) {
-                throw new Error('GitHub API hatası');
             }
         }
         
