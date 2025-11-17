@@ -1403,32 +1403,64 @@ ${htmlContent}
                 }
                 if (response.ok) {
                     haberler = await response.json();
+                    // LocalStorage'a da kaydet
+                    localStorage.setItem('haberler_local', JSON.stringify(haberler));
                 } else {
-                    // Fallback: GitHub'dan yükle
-                    if (ADMIN_CONFIG.githubToken) {
-                        const ghResponse = await fetch(
-                            `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/_data/haberler.json?ref=${ADMIN_CONFIG.githubBranch}`,
-                            {
-                                headers: {
-                                    'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
-                                    'Accept': 'application/vnd.github.v3+json'
-                                }
-                            }
-                        );
-                        if (ghResponse.ok) {
-                            const fileData = await ghResponse.json();
-                            const content = decodeURIComponent(escape(atob(fileData.content)));
-                            haberler = JSON.parse(content);
-                        }
-                    }
+                    haberler = [];
                 }
+                
+                CURRENT_PAGE.data.haberler = haberler;
+                renderHaberList();
             } catch (error) {
                 console.error('Haberler yüklenirken hata:', error);
+                CURRENT_PAGE.data.haberler = [];
+                renderHaberList();
             }
+        }
+        
+        // GitHub'dan haberleri yükle (arka plan senkronizasyonu)
+        async function loadHaberlerFromGitHub() {
+            if (!ADMIN_CONFIG.githubToken) return;
             
-            CURRENT_PAGE.data.haberler = haberler;
-            
-            // Haber listesi sekmesi
+            try {
+                const ghResponse = await fetch(
+                    `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/_data/haberler.json?ref=${ADMIN_CONFIG.githubBranch}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                if (ghResponse.ok) {
+                    const fileData = await ghResponse.json();
+                    const content = decodeURIComponent(escape(atob(fileData.content)));
+                    const githubHaberler = JSON.parse(content);
+                    
+                    // LocalStorage'daki haberlerle birleştir (local öncelikli)
+                    const localHaberler = CURRENT_PAGE.data.haberler || [];
+                    const combined = [...localHaberler];
+                    
+                    // GitHub'daki haberleri ekle (zaten yoksa)
+                    githubHaberler.forEach(ghHaber => {
+                        if (!combined.find(h => h.title === ghHaber.title && h.date === ghHaber.date)) {
+                            combined.push(ghHaber);
+                        }
+                    });
+                    
+                    // Tarihe göre sırala
+                    combined.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    CURRENT_PAGE.data.haberler = combined;
+                    localStorage.setItem('haberler_local', JSON.stringify(combined));
+                    renderHaberList();
+                }
+            } catch (error) {
+                console.error('GitHub senkronizasyon hatası:', error);
+            }
+        }
+        
+        // Haber listesi sekmesi
             const listTab = document.createElement('button');
             listTab.className = 'tab-btn active';
             listTab.innerHTML = '📋 Haber Listesi';
