@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İçerik Yönetim Paneli - Şimdi Onlar Manşet</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="/firebase-config.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -538,35 +544,62 @@
             document.getElementById('editForm').classList.remove('active');
             document.getElementById('pageGrid').style.display = 'grid';
             
-            // GitHub token kontrolü ve uyarı
-            if (!ADMIN_CONFIG.githubToken || ADMIN_CONFIG.githubToken === '') {
+            // Firebase ve GitHub token kontrolü ve uyarı
+            const hasFirebase = USE_FIREBASE && typeof firebase !== 'undefined';
+            const hasGitHubToken = ADMIN_CONFIG.githubToken && ADMIN_CONFIG.githubToken !== '';
+            
+            if (!hasFirebase && !hasGitHubToken) {
                 const warningDiv = document.createElement('div');
                 warningDiv.className = 'github-warning';
                 warningDiv.innerHTML = `
                     <div style="background: rgba(220, 38, 38, 0.15); border: 2px solid rgba(220, 38, 38, 0.4); border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
-                        <h3 style="color: #fca5a5; margin-bottom: 1rem; font-size: 1.5rem;">⚠️ ÖNEMLİ: GitHub Token Gerekli</h3>
+                        <h3 style="color: #fca5a5; margin-bottom: 1rem; font-size: 1.5rem;">⚠️ ÖNEMLİ: Firebase veya GitHub Token Gerekli</h3>
                         <div style="background: rgba(220, 38, 38, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #dc2626;">
                             <p style="color: #fca5a5; font-weight: 600; margin-bottom: 0.5rem;">🔴 Şu anda değişiklikler sadece bu tarayıcıda görünür!</p>
                             <p style="color: #cbd5e1; line-height: 1.6;">
                                 Admin panelinden yaptığınız değişiklikler şu anda <strong>sadece bu tarayıcıda</strong> LocalStorage'a kaydediliyor. 
-                                <strong>Tüm kullanıcıların görmesi için GitHub token eklemeniz zorunludur.</strong>
+                                <strong>Tüm kullanıcıların görmesi için Firebase veya GitHub token eklemeniz gerekiyor.</strong>
                             </p>
                         </div>
-                        <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 1rem;">
-                            <strong>📋 Yapmanız gerekenler:</strong><br>
-                            1. GitHub > Settings > Developer settings > Personal access tokens<br>
-                            2. Yeni token oluşturun (repo scope gerekli)<br>
-                            3. <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">admin-config.js</code> dosyasına token'ı ekleyin<br>
-                            4. Sayfayı yenileyin
-                        </p>
-                        <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 1rem;">
-                            💡 Detaylı kurulum için <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ADMIN-SETUP.md</code> dosyasına bakın.
-                        </p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="background: rgba(34, 197, 94, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid #22c55e;">
+                                <p style="color: #86efac; font-weight: 600; margin-bottom: 0.5rem;">🔥 Firebase (Önerilen)</p>
+                                <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5;">
+                                    • Ücretsiz<br>
+                                    • Anında yayınlama<br>
+                                    • GitHub token gerektirmez<br>
+                                    • <a href="/FIREBASE-SETUP.md" target="_blank" style="color: #86efac; text-decoration: underline;">Kurulum rehberi</a>
+                                </p>
+                            </div>
+                            <div style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                                <p style="color: #93c5fd; font-weight: 600; margin-bottom: 0.5rem;">📤 GitHub Token</p>
+                                <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5;">
+                                    • GitHub Pages entegrasyonu<br>
+                                    • 1-2 dakika build süresi<br>
+                                    • <a href="/ADMIN-SETUP.md" target="_blank" style="color: #93c5fd; text-decoration: underline;">Kurulum rehberi</a>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 `;
                 const pageGrid = document.getElementById('pageGrid');
                 if (pageGrid && !document.querySelector('.github-warning')) {
                     pageGrid.parentNode.insertBefore(warningDiv, pageGrid);
+                }
+            } else if (hasFirebase) {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'firebase-success';
+                successDiv.innerHTML = `
+                    <div style="background: rgba(34, 197, 94, 0.15); border: 2px solid rgba(34, 197, 94, 0.4); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <p style="color: #86efac; font-weight: 600; margin-bottom: 0.5rem;">✅ Firebase Aktif!</p>
+                        <p style="color: #cbd5e1; line-height: 1.6;">
+                            Değişiklikleriniz <strong>tüm kullanıcılar tarafından anında</strong> görünecek!
+                        </p>
+                    </div>
+                `;
+                const pageGrid = document.getElementById('pageGrid');
+                if (pageGrid && !document.querySelector('.firebase-success')) {
+                    pageGrid.parentNode.insertBefore(successDiv, pageGrid);
                 }
             }
         }
@@ -1361,7 +1394,31 @@ ${htmlContent}
             // Haberleri yükle
             let haberler = [];
             
-            // Önce LocalStorage'dan yükle (en güncel)
+            // Önce Firebase'den yükle (eğer aktifse)
+            if (USE_FIREBASE && typeof firebase !== 'undefined') {
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(FIREBASE_CONFIG);
+                    }
+                    const database = firebase.database();
+                    const snapshot = await database.ref('haberler').once('value');
+                    const firebaseHaberler = snapshot.val();
+                    if (firebaseHaberler && Array.isArray(firebaseHaberler)) {
+                        haberler = firebaseHaberler;
+                    } else if (firebaseHaberler && typeof firebaseHaberler === 'object') {
+                        haberler = Object.values(firebaseHaberler);
+                    }
+                    if (haberler.length > 0) {
+                        CURRENT_PAGE.data.haberler = haberler;
+                        renderHaberList();
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Firebase okuma hatası:', e);
+                }
+            }
+            
+            // Firebase'den veri yoksa LocalStorage'dan yükle
             try {
                 const localData = localStorage.getItem('haberler_local');
                 if (localData) {
@@ -1595,61 +1652,94 @@ ${htmlContent}
             await saveHaberler();
         }
         
+        // Firebase'e haberleri kaydet
+        async function saveHaberlerToFirebase(haberler) {
+            if (!USE_FIREBASE || typeof firebase === 'undefined') {
+                return false;
+            }
+            
+            try {
+                // Firebase'i başlat
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(FIREBASE_CONFIG);
+                }
+                const database = firebase.database();
+                
+                // Firebase'e yaz
+                await database.ref('haberler').set(haberler);
+                console.log('Haberler Firebase\'e kaydedildi');
+                return true;
+            } catch (error) {
+                console.error('Firebase yazma hatası:', error);
+                return false;
+            }
+        }
+        
         async function saveHaberler() {
             const messageDiv = document.getElementById('saveMessage');
             messageDiv.innerHTML = '<div class="success">⏳ Haberler kaydediliyor...</div>';
             
             const jsonContent = JSON.stringify(CURRENT_PAGE.data.haberler, null, 2);
+            let savedToFirebase = false;
+            let savedToGitHub = false;
             
-            // Her zaman LocalStorage'a kaydet (GitHub olmadan da çalışsın)
-            try {
-                localStorage.setItem('haberler_local', jsonContent);
-                console.log('Haberler LocalStorage\'a kaydedildi');
-            } catch (e) {
-                console.error('LocalStorage kayıt hatası:', e);
+            // Önce Firebase'e kaydet (eğer aktifse)
+            if (USE_FIREBASE) {
+                savedToFirebase = await saveHaberlerToFirebase(CURRENT_PAGE.data.haberler);
             }
             
+            // Her zaman LocalStorage'a kaydet (Firebase kapalıysa fallback olarak)
+            if (!USE_FIREBASE) {
+                try {
+                    localStorage.setItem('haberler_local', jsonContent);
+                    console.log('Haberler LocalStorage\'a kaydedildi');
+                } catch (e) {
+                    console.error('LocalStorage kayıt hatası:', e);
+                }
+            }
+            
+            // GitHub token varsa GitHub'a da kaydet
             if (ADMIN_CONFIG.githubToken) {
                 try {
                     await saveHaberlerToGitHub(jsonContent);
-                    messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi (anında görünür)<br>📤 GitHub\'a push edildi<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!</div>';
-                    setTimeout(() => {
-                        loadHaberlerPage();
-                        messageDiv.innerHTML = '';
-                    }, 4000);
+                    savedToGitHub = true;
                 } catch (error) {
                     console.error('GitHub API hatası:', error);
-                    messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler LocalStorage\'a kaydedildi!</strong><br><br>💾 Anında <a href="/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!<br><br>⚠️ GitHub\'a kaydedilemedi, ancak LocalStorage\'da saklandı.</div>';
-                    setTimeout(() => {
-                        loadHaberlerPage();
-                        messageDiv.innerHTML = '';
-                    }, 4000);
                 }
+            }
+            
+            // Başarı mesajını göster
+            if (savedToFirebase) {
+                messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler kaydedildi!</strong><br><br>🔥 Firebase\'e kaydedildi (tüm kullanıcılar anında görecek!)<br>' + 
+                    (savedToGitHub ? '📤 GitHub\'a da push edildi<br>' : '') + 
+                    '🚀 <a href="/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> anında görünecek!</div>';
+            } else if (savedToGitHub) {
+                messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi (anında görünür)<br>📤 GitHub\'a push edildi<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!</div>';
             } else {
-                // GitHub token yok, sadece LocalStorage'a kaydet
+                // Ne Firebase ne GitHub - sadece LocalStorage
                 messageDiv.innerHTML = `
                     <div class="success">
                         <div style="background: rgba(220, 38, 38, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #dc2626;">
                             <p style="color: #fca5a5; font-weight: 600; margin-bottom: 0.5rem;">⚠️ ÖNEMLİ: Sadece Bu Tarayıcıda Görünür!</p>
                             <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">
                                 Haberler LocalStorage'a kaydedildi ve <strong>sadece bu tarayıcıda</strong> görünecek. 
-                                <strong>Tüm kullanıcıların görmesi için GitHub token eklemeniz gerekiyor!</strong>
+                                <strong>Tüm kullanıcıların görmesi için Firebase veya GitHub token eklemeniz gerekiyor!</strong>
                             </p>
                         </div>
                         <p>✅ <strong>Haberler kaydedildi!</strong></p>
                         <p>💾 LocalStorage'a kaydedildi</p>
                         <p>🚀 Anında <a href="/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek (sadece bu tarayıcıda)</p>
                         <p style="margin-top: 1rem; color: #94a3b8; font-size: 0.9rem;">
-                            💡 <strong>Çözüm:</strong> GitHub token ekleyerek tüm kullanıcıların görmesini sağlayın. 
-                            <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ADMIN-SETUP.md</code> dosyasına bakın.
+                            💡 <strong>Çözüm:</strong> Firebase kurulumu için <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">FIREBASE-SETUP.md</code> dosyasına bakın.
                         </p>
                     </div>
                 `;
-                setTimeout(() => {
-                    loadHaberlerPage();
-                    messageDiv.innerHTML = '';
-                }, 6000);
             }
+            
+            setTimeout(() => {
+                loadHaberlerPage();
+                messageDiv.innerHTML = '';
+            }, savedToFirebase ? 3000 : 6000);
         }
         
         async function saveHaberlerToGitHub(content) {
@@ -1817,7 +1907,31 @@ ${htmlContent}
             // Kararları yükle
             let kararlar = [];
             
-            // Önce LocalStorage'dan yükle (en güncel)
+            // Önce Firebase'den yükle (eğer aktifse)
+            if (USE_FIREBASE && typeof firebase !== 'undefined') {
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(FIREBASE_CONFIG);
+                    }
+                    const database = firebase.database();
+                    const snapshot = await database.ref('kararlar').once('value');
+                    const firebaseKararlar = snapshot.val();
+                    if (firebaseKararlar && Array.isArray(firebaseKararlar)) {
+                        kararlar = firebaseKararlar;
+                    } else if (firebaseKararlar && typeof firebaseKararlar === 'object') {
+                        kararlar = Object.values(firebaseKararlar);
+                    }
+                    if (kararlar.length > 0) {
+                        CURRENT_PAGE.data.kararlar = kararlar;
+                        renderKararList();
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Firebase okuma hatası:', e);
+                }
+            }
+            
+            // Firebase'den veri yoksa LocalStorage'dan yükle
             try {
                 const localData = localStorage.getItem('kararlar_local');
                 if (localData) {
@@ -2101,61 +2215,94 @@ ${htmlContent}
             await saveKararlar();
         }
         
+        // Firebase'e kararları kaydet
+        async function saveKararlarToFirebase(kararlar) {
+            if (!USE_FIREBASE || typeof firebase === 'undefined') {
+                return false;
+            }
+            
+            try {
+                // Firebase'i başlat
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(FIREBASE_CONFIG);
+                }
+                const database = firebase.database();
+                
+                // Firebase'e yaz
+                await database.ref('kararlar').set(kararlar);
+                console.log('Kararlar Firebase\'e kaydedildi');
+                return true;
+            } catch (error) {
+                console.error('Firebase yazma hatası:', error);
+                return false;
+            }
+        }
+        
         async function saveKararlar() {
             const messageDiv = document.getElementById('saveMessage');
             messageDiv.innerHTML = '<div class="success">⏳ Kararlar kaydediliyor...</div>';
             
             const jsonContent = JSON.stringify(CURRENT_PAGE.data.kararlar, null, 2);
+            let savedToFirebase = false;
+            let savedToGitHub = false;
             
-            // Her zaman LocalStorage'a kaydet (GitHub olmadan da çalışsın)
-            try {
-                localStorage.setItem('kararlar_local', jsonContent);
-                console.log('Kararlar LocalStorage\'a kaydedildi');
-            } catch (e) {
-                console.error('LocalStorage kayıt hatası:', e);
+            // Önce Firebase'e kaydet (eğer aktifse)
+            if (USE_FIREBASE) {
+                savedToFirebase = await saveKararlarToFirebase(CURRENT_PAGE.data.kararlar);
             }
             
+            // Her zaman LocalStorage'a kaydet (Firebase kapalıysa fallback olarak)
+            if (!USE_FIREBASE) {
+                try {
+                    localStorage.setItem('kararlar_local', jsonContent);
+                    console.log('Kararlar LocalStorage\'a kaydedildi');
+                } catch (e) {
+                    console.error('LocalStorage kayıt hatası:', e);
+                }
+            }
+            
+            // GitHub token varsa GitHub'a da kaydet
             if (ADMIN_CONFIG.githubToken) {
                 try {
                     await saveKararlarToGitHub(jsonContent);
-                    messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi (anında görünür)<br>📤 GitHub\'a push edildi<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!</div>';
-                    setTimeout(() => {
-                        loadKararlarPage();
-                        messageDiv.innerHTML = '';
-                    }, 4000);
+                    savedToGitHub = true;
                 } catch (error) {
                     console.error('GitHub API hatası:', error);
-                    messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar LocalStorage\'a kaydedildi!</strong><br><br>💾 Anında <a href="/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!<br><br>⚠️ GitHub\'a kaydedilemedi, ancak LocalStorage\'da saklandı.</div>';
-                    setTimeout(() => {
-                        loadKararlarPage();
-                        messageDiv.innerHTML = '';
-                    }, 4000);
                 }
+            }
+            
+            // Başarı mesajını göster
+            if (savedToFirebase) {
+                messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar kaydedildi!</strong><br><br>🔥 Firebase\'e kaydedildi (tüm kullanıcılar anında görecek!)<br>' + 
+                    (savedToGitHub ? '📤 GitHub\'a da push edildi<br>' : '') + 
+                    '🚀 <a href="/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> anında görünecek!</div>';
+            } else if (savedToGitHub) {
+                messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi (anında görünür)<br>📤 GitHub\'a push edildi<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!</div>';
             } else {
-                // GitHub token yok, sadece LocalStorage'a kaydet
+                // Ne Firebase ne GitHub - sadece LocalStorage
                 messageDiv.innerHTML = `
                     <div class="success">
                         <div style="background: rgba(220, 38, 38, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #dc2626;">
                             <p style="color: #fca5a5; font-weight: 600; margin-bottom: 0.5rem;">⚠️ ÖNEMLİ: Sadece Bu Tarayıcıda Görünür!</p>
                             <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">
                                 Kararlar LocalStorage'a kaydedildi ve <strong>sadece bu tarayıcıda</strong> görünecek. 
-                                <strong>Tüm kullanıcıların görmesi için GitHub token eklemeniz gerekiyor!</strong>
+                                <strong>Tüm kullanıcıların görmesi için Firebase veya GitHub token eklemeniz gerekiyor!</strong>
                             </p>
                         </div>
                         <p>✅ <strong>Kararlar kaydedildi!</strong></p>
                         <p>💾 LocalStorage'a kaydedildi</p>
                         <p>🚀 Anında <a href="/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek (sadece bu tarayıcıda)</p>
                         <p style="margin-top: 1rem; color: #94a3b8; font-size: 0.9rem;">
-                            💡 <strong>Çözüm:</strong> GitHub token ekleyerek tüm kullanıcıların görmesini sağlayın. 
-                            <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ADMIN-SETUP.md</code> dosyasına bakın.
+                            💡 <strong>Çözüm:</strong> Firebase kurulumu için <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">FIREBASE-SETUP.md</code> dosyasına bakın.
                         </p>
                     </div>
                 `;
-                setTimeout(() => {
-                    loadKararlarPage();
-                    messageDiv.innerHTML = '';
-                }, 6000);
             }
+            
+            setTimeout(() => {
+                loadKararlarPage();
+                messageDiv.innerHTML = '';
+            }, savedToFirebase ? 3000 : 6000);
         }
         
         async function saveKararlarToGitHub(content) {
