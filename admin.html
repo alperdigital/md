@@ -1530,6 +1530,8 @@ ${htmlContent}
         function deleteHaber(index) {
             if (confirm('Bu haberi silmek istediğinizden emin misiniz?')) {
                 CURRENT_PAGE.data.haberler.splice(index, 1);
+                // LocalStorage'ı güncelle
+                localStorage.setItem('haberler_local', JSON.stringify(CURRENT_PAGE.data.haberler));
                 saveHaberler();
             }
         }
@@ -1567,20 +1569,37 @@ ${htmlContent}
             
             const jsonContent = JSON.stringify(CURRENT_PAGE.data.haberler, null, 2);
             
+            // Her zaman LocalStorage'a kaydet (GitHub olmadan da çalışsın)
+            try {
+                localStorage.setItem('haberler_local', jsonContent);
+                console.log('Haberler LocalStorage\'a kaydedildi');
+            } catch (e) {
+                console.error('LocalStorage kayıt hatası:', e);
+            }
+            
             if (ADMIN_CONFIG.githubToken) {
                 try {
                     await saveHaberlerToGitHub(jsonContent);
-                    messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler kaydedildi!</strong><br><br>📤 GitHub\'a push edildi.<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!</div>';
+                    messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi (anında görünür)<br>📤 GitHub\'a push edildi<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!</div>';
                     setTimeout(() => {
                         loadHaberlerPage();
                         messageDiv.innerHTML = '';
                     }, 4000);
                 } catch (error) {
                     console.error('GitHub API hatası:', error);
-                    downloadHaberlerFile(jsonContent, messageDiv);
+                    messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler LocalStorage\'a kaydedildi!</strong><br><br>💾 Anında <a href="/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!<br><br>⚠️ GitHub\'a kaydedilemedi, ancak LocalStorage\'da saklandı.</div>';
+                    setTimeout(() => {
+                        loadHaberlerPage();
+                        messageDiv.innerHTML = '';
+                    }, 4000);
                 }
             } else {
-                downloadHaberlerFile(jsonContent, messageDiv);
+                // GitHub token yok, sadece LocalStorage'a kaydet
+                messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler kaydedildi!</strong><br><br>💾 LocalStorage\'a kaydedildi<br>🚀 Anında <a href="/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!<br><br>💡 <small>Not: Bu haberler sadece bu tarayıcıda görünür. Tüm cihazlarda görünmesi için GitHub token ekleyin.</small></div>';
+                setTimeout(() => {
+                    loadHaberlerPage();
+                    messageDiv.innerHTML = '';
+                }, 4000);
             }
         }
         
