@@ -8,6 +8,9 @@ gem "jekyll-feed", "~> 0.12"
 gem "jekyll-sitemap", "~> 1.4"
 gem "jekyll-seo-tag", "~> 2.6"
 
+# Markdown parser
+gem "kramdown-parser-gfm"
+
 # Tema
 gem "jekyll-theme-minimal"
 
