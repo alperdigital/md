@@ -554,14 +554,85 @@
             CURRENT_PAGE.name = pageNames[file].name;
             CURRENT_PAGE.displayName = pageNames[file].display;
             
-            fetch(`/${file === 'index' ? '' : file}.md`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Sayfa bulunamadı');
+            // Dosyayı GitHub'dan veya Jekyll sunucusundan oku
+            loadPageContent(file);
+        }
+        
+        async function loadPageContent(file) {
+            const fileName = `${file === 'index' ? 'index' : file}.md`;
+            const messageDiv = document.getElementById('saveMessage');
+            
+            // Önce GitHub'dan okumayı dene
+            if (ADMIN_CONFIG.githubToken) {
+                try {
+                    const response = await fetch(
+                        `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${fileName}?ref=${ADMIN_CONFIG.githubBranch}`,
+                        {
+                            headers: {
+                                'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        }
+                    );
+                    
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        const content = decodeURIComponent(escape(atob(fileData.content)));
+                        parsePageContent(content, file);
+                        renderEditForm(file);
+                        document.getElementById('pageGrid').style.display = 'none';
+                        document.getElementById('editForm').classList.add('active');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        return;
                     }
-                    return response.text();
+                } catch (error) {
+                    console.warn('GitHub API hatası:', error);
+                }
+            }
+            
+            // GitHub başarısız olursa, Jekyll sunucusundan dene
+            let fileUrl;
+            if (file === 'index') {
+                fileUrl = '/index.md';
+            } else {
+                fileUrl = `/${file}.md`;
+            }
+            
+            // Önce .md dosyasını dene
+            fetch(fileUrl)
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+                    // Eğer .md bulunamazsa, HTML sayfasından parse et
+                    if (file === 'index') {
+                        return fetch('/').then(r => {
+                            if (r.ok) return r.text();
+                            throw new Error('Index sayfası bulunamadı');
+                        });
+                    } else {
+                        return fetch(`/${file}/`).then(r => {
+                            if (r.ok) return r.text();
+                            return fetch(`/${file}.html`).then(r2 => {
+                                if (r2.ok) return r2.text();
+                                throw new Error('Sayfa bulunamadı');
+                            });
+                        });
+                    }
                 })
                 .then(content => {
+                    // Eğer HTML geldiyse, sadece body içeriğini al
+                    if (content.includes('<!DOCTYPE') || content.includes('<html')) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(content, 'text/html');
+                        const mainContent = doc.querySelector('main') || doc.querySelector('.page-content') || doc.body;
+                        if (mainContent) {
+                            content = mainContent.innerHTML;
+                        } else {
+                            throw new Error('Sayfa içeriği bulunamadı');
+                        }
+                    }
+                    
                     parsePageContent(content, file);
                     renderEditForm(file);
                     document.getElementById('pageGrid').style.display = 'none';
@@ -570,7 +641,8 @@
                 })
                 .catch(error => {
                     console.error('Yükleme hatası:', error);
-                    alert('Sayfa yüklenirken hata oluştu. Lütfen sayfanın mevcut olduğundan emin olun.');
+                    const errorMsg = `Sayfa yüklenirken hata oluştu.\n\nOlası nedenler:\n1. Jekyll sunucusu çalışmıyor olabilir (localhost:8602)\n2. GitHub token eksik veya yanlış olabilir\n3. Dosya mevcut değil olabilir\n\nÇözüm:\n- Jekyll sunucusunun çalıştığından emin olun\n- admin-config.js dosyasına GitHub token ekleyin\n\nHata: ${error.message || error}`;
+                    alert(errorMsg);
                 });
         }
         
