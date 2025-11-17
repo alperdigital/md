@@ -1329,7 +1329,12 @@ ${htmlContent}
             // Haberleri yükle
             let haberler = [];
             try {
-                const response = await fetch('/_data/haberler.json');
+                // Önce assets/haberler.json'dan yükle
+                let response = await fetch('/assets/haberler.json');
+                if (!response.ok) {
+                    // Fallback: _data/haberler.json'dan dene
+                    response = await fetch('/_data/haberler.json');
+                }
                 if (response.ok) {
                     haberler = await response.json();
                 } else {
@@ -1713,7 +1718,12 @@ ${htmlContent}
             // Kararları yükle
             let kararlar = [];
             try {
-                const response = await fetch('/_data/kararlar.json');
+                // Önce assets/kararlar.json'dan yükle
+                let response = await fetch('/assets/kararlar.json');
+                if (!response.ok) {
+                    // Fallback: _data/kararlar.json'dan dene
+                    response = await fetch('/_data/kararlar.json');
+                }
                 if (response.ok) {
                     kararlar = await response.json();
                 } else {
