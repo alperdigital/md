@@ -1452,7 +1452,8 @@ ${htmlContent}
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
-        function renderHaberList(haberler) {
+        function renderHaberList() {
+            const haberler = CURRENT_PAGE.data.haberler || [];
             if (!haberler || haberler.length === 0) {
                 return '<div class="form-group"><p style="color: #cbd5e1; text-align: center; padding: 2rem;">Henüz haber eklenmemiş. "Yeni Haber Ekle" sekmesinden haber ekleyebilirsiniz.</p></div>';
             }
