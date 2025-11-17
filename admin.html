@@ -704,40 +704,121 @@
             
             const pageContent = tempDiv.querySelector('.page-content');
             if (!pageContent) {
-                CURRENT_PAGE.data.sections = [{ type: 'content', html: html }];
+                // Eğer page-content div'i yoksa, tüm HTML'i içerik olarak kabul et
+                CURRENT_PAGE.data.sections = [];
+                const allElements = tempDiv.querySelectorAll('h1, h2, h3, p, ul, ol');
+                if (allElements.length === 0) {
+                    CURRENT_PAGE.data.sections = [{ type: 'paragraph', text: tempDiv.textContent.trim() || 'İçerik bulunamadı' }];
+                } else {
+                    allElements.forEach(el => {
+                        const tagName = el.tagName.toLowerCase();
+                        if (tagName === 'h1') {
+                            CURRENT_PAGE.data.sections.push({ type: 'heading1', text: el.textContent.trim() });
+                        } else if (tagName === 'h2') {
+                            CURRENT_PAGE.data.sections.push({ type: 'heading2', text: el.textContent.trim() });
+                        } else if (tagName === 'p' && el.textContent.trim()) {
+                            CURRENT_PAGE.data.sections.push({ type: 'paragraph', text: el.textContent.trim() });
+                        } else if (tagName === 'ul' || tagName === 'ol') {
+                            const items = Array.from(el.querySelectorAll('li')).map(li => li.textContent.trim()).filter(i => i);
+                            if (items.length > 0) {
+                                CURRENT_PAGE.data.sections.push({ type: 'list', items: items });
+                            }
+                        }
+                    });
+                }
                 return;
             }
             
             CURRENT_PAGE.data.sections = [];
             let currentSection = null;
             
-            for (let node of pageContent.childNodes) {
+            // Tüm child node'ları işle
+            const nodes = Array.from(pageContent.childNodes);
+            
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                
+                // Sadece element node'ları işle
                 if (node.nodeType === 1) {
                     const tagName = node.tagName.toLowerCase();
+                    const textContent = node.textContent.trim();
+                    
+                    // Boş elementleri atla
+                    if (!textContent && tagName !== 'ul' && tagName !== 'ol') {
+                        continue;
+                    }
                     
                     if (tagName === 'h1') {
                         if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
-                        currentSection = { type: 'heading1', text: node.textContent.trim() };
+                        currentSection = { type: 'heading1', text: textContent };
                     } else if (tagName === 'h2') {
                         if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
-                        currentSection = { type: 'heading2', text: node.textContent.trim() };
+                        currentSection = { type: 'heading2', text: textContent };
+                    } else if (tagName === 'h3') {
+                        if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+                        currentSection = { type: 'heading2', text: textContent }; // H3'ü H2 olarak göster
                     } else if (tagName === 'p') {
                         if (currentSection && currentSection.type === 'paragraph') {
-                            currentSection.text += '\n\n' + node.textContent.trim();
+                            // Önceki paragrafa ekle
+                            currentSection.text += '\n\n' + textContent;
                         } else {
                             if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
-                            currentSection = { type: 'paragraph', text: node.textContent.trim() };
+                            currentSection = { type: 'paragraph', text: textContent };
                         }
                     } else if (tagName === 'ul' || tagName === 'ol') {
                         if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
-                        const items = node.querySelectorAll('li');
-                        const listItems = Array.from(items).map(li => li.textContent.trim());
-                        currentSection = { type: 'list', items: listItems };
+                        const items = Array.from(node.querySelectorAll('li')).map(li => li.textContent.trim()).filter(i => i);
+                        if (items.length > 0) {
+                            currentSection = { type: 'list', items: items };
+                        } else {
+                            currentSection = null;
+                        }
+                    } else if (tagName === 'div' && node.querySelector('h1, h2, h3, p, ul, ol')) {
+                        // İç içe div'ler için recursive işleme
+                        const innerElements = node.querySelectorAll('h1, h2, h3, p, ul, ol');
+                        innerElements.forEach(el => {
+                            const innerTag = el.tagName.toLowerCase();
+                            const innerText = el.textContent.trim();
+                            
+                            if (innerTag === 'h1') {
+                                if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+                                currentSection = { type: 'heading1', text: innerText };
+                            } else if (innerTag === 'h2') {
+                                if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+                                currentSection = { type: 'heading2', text: innerText };
+                            } else if (innerTag === 'p' && innerText) {
+                                if (currentSection && currentSection.type === 'paragraph') {
+                                    currentSection.text += '\n\n' + innerText;
+                                } else {
+                                    if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+                                    currentSection = { type: 'paragraph', text: innerText };
+                                }
+                            } else if ((innerTag === 'ul' || innerTag === 'ol') && el.querySelector('li')) {
+                                if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+                                const items = Array.from(el.querySelectorAll('li')).map(li => li.textContent.trim()).filter(i => i);
+                                if (items.length > 0) {
+                                    currentSection = { type: 'list', items: items };
+                                }
+                            }
+                        });
                     }
                 }
             }
             
-            if (currentSection) CURRENT_PAGE.data.sections.push(currentSection);
+            // Son section'ı ekle
+            if (currentSection) {
+                CURRENT_PAGE.data.sections.push(currentSection);
+            }
+            
+            // Eğer hiç section yoksa, en azından bir tane ekle
+            if (CURRENT_PAGE.data.sections.length === 0) {
+                const allText = pageContent.textContent.trim();
+                if (allText) {
+                    CURRENT_PAGE.data.sections.push({ type: 'paragraph', text: allText });
+                } else {
+                    CURRENT_PAGE.data.sections.push({ type: 'paragraph', text: 'İçerik bulunamadı' });
+                }
+            }
         }
         
         function renderEditForm(file) {
@@ -984,9 +1065,17 @@
                 clickedElement.classList.add('active');
             }
             
-            const targetContent = document.getElementById(`section-${tabId}`);
+            // tabId'den section index'ini çıkar
+            let sectionIndex = tabId;
+            if (typeof tabId === 'string' && tabId.startsWith('section-')) {
+                sectionIndex = tabId.replace('section-', '');
+            }
+            
+            const targetContent = document.getElementById(`section-${sectionIndex}`);
             if (targetContent) {
                 targetContent.classList.add('active');
+            } else {
+                console.warn('Section content bulunamadı:', `section-${sectionIndex}`);
             }
         }
         
