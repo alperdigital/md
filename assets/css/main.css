@@ -546,6 +546,24 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    /* Container ve genel düzen */
+    .container {
+        padding: 0 16px;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Navigation */
+    .navbar {
+        padding: 1rem 0;
+    }
+
+    .nav-brand a {
+        font-size: 1.5rem;
+    }
+
     .nav-menu {
         position: fixed;
         left: -100%;
@@ -576,6 +594,7 @@ body {
         border-radius: 0;
         padding: 1rem;
         width: 100%;
+        font-size: 1.1rem;
     }
 
     .nav-toggle {
@@ -595,54 +614,234 @@ body {
         transform: rotate(-45deg) translate(7px, -6px);
     }
 
+    /* Hero Section */
     .hero-section {
-        padding: 3rem 0;
-        min-height: 400px;
+        padding: 2rem 0;
+        min-height: 350px;
         margin: 1rem 0 2rem;
         border-radius: 16px;
     }
 
+    .hero-content {
+        padding: 0 1rem;
+    }
+
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2rem;
+        line-height: 1.2;
     }
 
     .hero-description {
-        font-size: 1rem;
-        margin-bottom: 2rem;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        padding: 0 1rem;
     }
 
     .hero-stats {
-        gap: 2rem;
+        gap: 1.5rem;
+        flex-wrap: wrap;
     }
 
     .stat-number {
+        font-size: 1.75rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0;
+    }
+
+    .card-modern {
+        padding: 1.5rem;
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
         font-size: 2rem;
     }
 
-    .cards-grid {
+    .card-content h3 {
+        font-size: 1.5rem;
+    }
+
+    /* Section Header */
+    .section-header {
+        padding: 1.5rem 0;
+    }
+
+    .section-header h2 {
+        font-size: 1.75rem;
+    }
+
+    /* Page Content */
+    .page-content {
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin: 1rem 0;
+    }
+
+    .page-content h1 {
+        font-size: 1.75rem;
+    }
+
+    .page-content h2 {
+        font-size: 1.25rem;
+    }
+
+    .page-content p,
+    .page-content li {
+        font-size: 1rem;
+    }
+
+    /* Main Content */
+    .main-content {
+        padding: 1.5rem 0;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 2rem 0;
+        margin-top: 2rem;
+    }
+}
+
+/* MANŞET ve KARARLAR sayfaları için mobil düzenlemeler */
+@media (max-width: 768px) {
+    .manset-page,
+    .kararlar-page {
+        padding: 1rem;
+        max-width: 100%;
+    }
+
+    .manset-header h1,
+    .kararlar-header h1 {
+        font-size: 2rem;
+    }
+
+    .manset-subtitle,
+    .kararlar-subtitle {
+        font-size: 1rem;
+    }
+
+    .manset-filters,
+    .kararlar-filters {
+        flex-direction: column;
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+
+    .filter-group {
+        min-width: 100%;
+        width: 100%;
+    }
+
+    .filter-select {
+        font-size: 1rem;
+        padding: 0.875rem;
+    }
+
+    .filter-reset {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+    }
+
+    .haberler-grid,
+    .kararlar-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
 
-    .card-modern {
-        padding: 2rem;
+    .haber-card,
+    .karar-card {
+        padding: 1.5rem;
     }
 
-    .section-header h2 {
+    .haber-title,
+    .karar-title {
+        font-size: 1.25rem;
+    }
+
+    .haber-meta,
+    .karar-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    /* Modal */
+    .haber-modal,
+    .karar-modal {
+        padding: 0;
+    }
+
+    .modal-content {
+        width: 100%;
+        margin: 0;
+        padding: 1.5rem;
+        border-radius: 0;
+        min-height: 100vh;
+        max-width: 100%;
+    }
+
+    .modal-close {
         font-size: 2rem;
+        right: 1rem;
+        top: 1rem;
+    }
+
+    .haber-detail h2,
+    .karar-detail h2 {
+        font-size: 1.5rem;
+    }
+
+    .haber-detail-content,
+    .karar-detail-content {
+        font-size: 1rem;
+    }
+}
+
+/* Çok küçük ekranlar için */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 12px;
+    }
+
+    .nav-brand a {
+        font-size: 1.25rem;
+    }
+
+    .hero-title {
+        font-size: 1.75rem;
+    }
+
+    .hero-description {
+        font-size: 0.9rem;
+    }
+
+    .card-modern {
+        padding: 1.25rem;
     }
 
     .page-content {
-        padding: 2rem;
-        border-radius: 16px;
+        padding: 1.25rem;
     }
 
-    .page-content h1 {
-        font-size: 2rem;
+    .manset-filters,
+    .kararlar-filters {
+        padding: 1rem;
     }
 
-    .page-content h2 {
-        font-size: 1.5rem;
+    .haber-card,
+    .karar-card {
+        padding: 1.25rem;
     }
 }
 
