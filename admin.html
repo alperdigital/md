@@ -537,6 +537,33 @@
             document.getElementById('adminPanel').classList.add('active');
             document.getElementById('editForm').classList.remove('active');
             document.getElementById('pageGrid').style.display = 'grid';
+            
+            // GitHub token kontrolü ve uyarı
+            if (!ADMIN_CONFIG.githubToken || ADMIN_CONFIG.githubToken === '') {
+                const warningDiv = document.createElement('div');
+                warningDiv.className = 'github-warning';
+                warningDiv.innerHTML = `
+                    <div style="background: rgba(220, 38, 38, 0.1); border: 2px solid rgba(220, 38, 38, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <h3 style="color: #fca5a5; margin-bottom: 1rem;">⚠️ GitHub Token Gerekli</h3>
+                        <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 1rem;">
+                            Anında yayınlama özelliğini kullanmak için GitHub Personal Access Token eklemeniz gerekiyor.
+                        </p>
+                        <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 1rem;">
+                            <strong>📋 Yapmanız gerekenler:</strong><br>
+                            1. GitHub > Settings > Developer settings > Personal access tokens<br>
+                            2. Yeni token oluşturun (repo scope gerekli)<br>
+                            3. <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">admin-config.js</code> dosyasına token'ı ekleyin
+                        </p>
+                        <p style="color: #94a3b8; font-size: 0.9rem;">
+                            💡 Detaylı kurulum için <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ADMIN-SETUP.md</code> dosyasına bakın.
+                        </p>
+                    </div>
+                `;
+                const pageGrid = document.getElementById('pageGrid');
+                if (pageGrid && !document.querySelector('.github-warning')) {
+                    pageGrid.parentNode.insertBefore(warningDiv, pageGrid);
+                }
+            }
         }
         
         function loadPage(file) {
@@ -1129,11 +1156,11 @@ ${htmlContent}
                 if (ADMIN_CONFIG.githubToken) {
                     try {
                         await saveToGitHub(frontMatter);
-                        messageDiv.innerHTML = '<div class="success">✅ <strong>Başarılı!</strong><br><br>Değişiklikleriniz kaydedildi. Birkaç dakika içinde web sitenizde görünecek.</div>';
+                        messageDiv.innerHTML = '<div class="success">✅ <strong>Başarılı!</strong><br><br>📤 Değişiklikleriniz GitHub\'a kaydedildi.<br>🔄 GitHub Pages otomatik olarak yeniden build ediyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io" target="_blank" style="color: #fca5a5; text-decoration: underline;">sitenizde</a> görünecek!</div>';
                         setTimeout(() => {
                             backToPanel();
                             messageDiv.innerHTML = '';
-                        }, 4000);
+                        }, 5000);
                     } catch (error) {
                         console.error('GitHub API hatası:', error);
                         downloadFile(frontMatter, messageDiv);
@@ -1543,12 +1570,13 @@ ${htmlContent}
             if (ADMIN_CONFIG.githubToken) {
                 try {
                     await saveHaberlerToGitHub(jsonContent);
-                    messageDiv.innerHTML = '<div class="success">✅ Haberler başarıyla kaydedildi!</div>';
+                    messageDiv.innerHTML = '<div class="success">✅ <strong>Haberler kaydedildi!</strong><br><br>📤 GitHub\'a push edildi.<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/2/" target="_blank" style="color: #fca5a5; text-decoration: underline;">MANŞET sayfasında</a> görünecek!</div>';
                     setTimeout(() => {
                         loadHaberlerPage();
                         messageDiv.innerHTML = '';
-                    }, 2000);
+                    }, 4000);
                 } catch (error) {
+                    console.error('GitHub API hatası:', error);
                     downloadHaberlerFile(jsonContent, messageDiv);
                 }
             } else {
@@ -1943,12 +1971,13 @@ ${htmlContent}
             if (ADMIN_CONFIG.githubToken) {
                 try {
                     await saveKararlarToGitHub(jsonContent);
-                    messageDiv.innerHTML = '<div class="success">✅ Kararlar başarıyla kaydedildi!</div>';
+                    messageDiv.innerHTML = '<div class="success">✅ <strong>Kararlar kaydedildi!</strong><br><br>📤 GitHub\'a push edildi.<br>🔄 GitHub Pages yeniden build ediliyor...<br>⏱️ 1-2 dakika içinde <a href="https://alperdigital.github.io/4/" target="_blank" style="color: #fca5a5; text-decoration: underline;">KARARLAR sayfasında</a> görünecek!</div>';
                     setTimeout(() => {
                         loadKararlarPage();
                         messageDiv.innerHTML = '';
-                    }, 2000);
+                    }, 4000);
                 } catch (error) {
+                    console.error('GitHub API hatası:', error);
                     downloadKararlarFile(jsonContent, messageDiv);
                 }
             } else {
