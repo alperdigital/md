@@ -458,10 +458,10 @@
                     <h3>ONLAR</h3>
                     <p>ONLAR sayfasını düzenle</p>
                 </div>
-                <div class="page-card" onclick="loadPage('2')">
+                <div class="page-card" onclick="loadHaberlerPage()">
                     <div class="icon">📰</div>
                     <h3>MANŞET</h3>
-                    <p>MANŞET sayfasını düzenle</p>
+                    <p>Haberleri yönet ve düzenle</p>
                 </div>
                 <div class="page-card" onclick="loadPage('3')">
                     <div class="icon">📺</div>
@@ -1312,6 +1312,343 @@ ${htmlContent}
             
             messageDiv.innerHTML = '<div class="success">✅ <strong>Dosya İndirildi!</strong><br><br>📋 <strong>Yapmanız gerekenler:</strong><br><br>1. İndirilen dosyayı bulun (genellikle İndirilenler klasöründe)<br>2. Dosyayı proje klasörüne kopyalayın<br>3. GitHub\'a yükleyin (push edin)<br><br><small>💡 <strong>İpucu:</strong> GitHub API token ekleyerek doğrudan kaydedebilirsiniz. admin-config.js dosyasına token ekleyin.</small></div>';
         }
+
+        // Haberler sayfası yükleme
+        async function loadHaberlerPage() {
+            CURRENT_PAGE.file = 'haberler';
+            CURRENT_PAGE.name = 'MANŞET';
+            CURRENT_PAGE.displayName = 'Haber Yönetimi';
+            
+            document.getElementById('editTitle').textContent = '📰 Haber Yönetimi';
+            const tabsDiv = document.getElementById('sectionTabs');
+            const contentsDiv = document.getElementById('sectionContents');
+            
+            tabsDiv.innerHTML = '';
+            contentsDiv.innerHTML = '';
+            
+            // Haberleri yükle
+            let haberler = [];
+            try {
+                const response = await fetch('/_data/haberler.json');
+                if (response.ok) {
+                    haberler = await response.json();
+                } else {
+                    // Fallback: GitHub'dan yükle
+                    if (ADMIN_CONFIG.githubToken) {
+                        const ghResponse = await fetch(
+                            `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/_data/haberler.json?ref=${ADMIN_CONFIG.githubBranch}`,
+                            {
+                                headers: {
+                                    'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                                    'Accept': 'application/vnd.github.v3+json'
+                                }
+                            }
+                        );
+                        if (ghResponse.ok) {
+                            const fileData = await ghResponse.json();
+                            const content = decodeURIComponent(escape(atob(fileData.content)));
+                            haberler = JSON.parse(content);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Haberler yüklenirken hata:', error);
+            }
+            
+            CURRENT_PAGE.data.haberler = haberler;
+            
+            // Haber listesi sekmesi
+            const listTab = document.createElement('button');
+            listTab.className = 'tab-btn active';
+            listTab.innerHTML = '📋 Haber Listesi';
+            listTab.onclick = (e) => {
+                e.preventDefault();
+                switchTab('haber-list', e.target);
+            };
+            tabsDiv.appendChild(listTab);
+            
+            const listContent = document.createElement('div');
+            listContent.id = 'section-haber-list';
+            listContent.className = 'section-content active';
+            listContent.innerHTML = renderHaberList(haberler);
+            contentsDiv.appendChild(listContent);
+            
+            // Yeni haber ekle sekmesi
+            const addTab = document.createElement('button');
+            addTab.className = 'tab-btn';
+            addTab.innerHTML = '➕ Yeni Haber Ekle';
+            addTab.onclick = (e) => {
+                e.preventDefault();
+                switchTab('haber-add', e.target);
+            };
+            tabsDiv.appendChild(addTab);
+            
+            const addContent = document.createElement('div');
+            addContent.id = 'section-haber-add';
+            addContent.className = 'section-content';
+            addContent.innerHTML = renderHaberForm();
+            contentsDiv.appendChild(addContent);
+            
+            document.getElementById('pageGrid').style.display = 'none';
+            document.getElementById('editForm').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function renderHaberList(haberler) {
+            if (!haberler || haberler.length === 0) {
+                return '<div class="form-group"><p style="color: #cbd5e1; text-align: center; padding: 2rem;">Henüz haber eklenmemiş. "Yeni Haber Ekle" sekmesinden haber ekleyebilirsiniz.</p></div>';
+            }
+            
+            return `
+                <div class="haber-list-admin">
+                    ${haberler.map((haber, index) => `
+                        <div class="haber-item-admin">
+                            <div class="haber-item-header">
+                                <h3>${escapeHTML(haber.title || 'Başlıksız')}</h3>
+                                <div class="haber-item-actions">
+                                    <button class="btn-secondary" onclick="editHaber(${index})" style="width: auto; padding: 0.5rem 1rem; margin: 0 0.5rem;">✏️ Düzenle</button>
+                                    <button class="btn-secondary" onclick="deleteHaber(${index})" style="width: auto; padding: 0.5rem 1rem; background: rgba(220, 38, 38, 0.3);">🗑️ Sil</button>
+                                </div>
+                            </div>
+                            <div class="haber-item-info">
+                                <span>📂 ${haber.category || 'Genel'}</span>
+                                <span>✍️ ${haber.author || 'Yazar'}</span>
+                                <span>📅 ${new Date(haber.date).toLocaleDateString('tr-TR')}</span>
+                                <span>🔥 ${haber.popularity || 0}</span>
+                            </div>
+                            <p class="haber-item-excerpt">${escapeHTML(haber.excerpt || '')}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function renderHaberForm(haber = null) {
+            const isEdit = haber !== null;
+            return `
+                <div class="form-group">
+                    <label>📝 Haber Başlığı</label>
+                    <input type="text" id="haberTitle" value="${haber ? escapeHTML(haber.title) : ''}" placeholder="Haber başlığını yazın...">
+                </div>
+                <div class="form-group">
+                    <label>📄 Kısa Açıklama (Excerpt)</label>
+                    <textarea id="haberExcerpt" placeholder="Haberin kısa açıklamasını yazın...">${haber ? escapeHTML(haber.excerpt) : ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>📝 Haber İçeriği</label>
+                    <textarea id="haberContent" style="min-height: 300px;" placeholder="Haberin tam içeriğini yazın...">${haber ? escapeHTML(haber.content) : ''}</textarea>
+                    <div class="help-text">
+                        <strong>💡 İpucu:</strong> Markdown formatında yazabilirsiniz. Başlıklar için #, liste için • kullanın.
+                    </div>
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>📂 Kategori</label>
+                        <select id="haberCategory" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 2px solid rgba(220, 38, 38, 0.3); background: #0f172a; color: #f1f5f9;">
+                            <option value="Gündem" ${haber && haber.category === 'Gündem' ? 'selected' : ''}>Gündem</option>
+                            <option value="Spor" ${haber && haber.category === 'Spor' ? 'selected' : ''}>Spor</option>
+                            <option value="Ekonomi" ${haber && haber.category === 'Ekonomi' ? 'selected' : ''}>Ekonomi</option>
+                            <option value="Teknoloji" ${haber && haber.category === 'Teknoloji' ? 'selected' : ''}>Teknoloji</option>
+                            <option value="Kültür" ${haber && haber.category === 'Kültür' ? 'selected' : ''}>Kültür</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>✍️ Yazar</label>
+                        <input type="text" id="haberAuthor" value="${haber ? escapeHTML(haber.author) : ''}" placeholder="Yazar adı...">
+                    </div>
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label>📅 Tarih</label>
+                        <input type="datetime-local" id="haberDate" value="${haber ? new Date(haber.date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16)}">
+                    </div>
+                    <div>
+                        <label>🔥 Popülerlik (0-100)</label>
+                        <input type="number" id="haberPopularity" value="${haber ? haber.popularity : 50}" min="0" max="100">
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="saveHaber(${isEdit ? 'true' : 'false'})">
+                        💾 ${isEdit ? 'Güncelle' : 'Kaydet'}
+                    </button>
+                    <button class="btn-secondary" onclick="cancelHaberEdit()">❌ İptal</button>
+                </div>
+            `;
+        }
+        
+        function editHaber(index) {
+            const haber = CURRENT_PAGE.data.haberler[index];
+            CURRENT_PAGE.data.editingHaberIndex = index;
+            
+            // Yeni haber ekle sekmesine geç
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.section-content').forEach(content => content.classList.remove('active'));
+            
+            const addTab = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.textContent.includes('Yeni Haber'));
+            if (addTab) {
+                addTab.classList.add('active');
+                addTab.textContent = '✏️ Haber Düzenle';
+            }
+            
+            const addContent = document.getElementById('section-haber-add');
+            addContent.classList.add('active');
+            addContent.innerHTML = renderHaberForm(haber);
+        }
+        
+        function deleteHaber(index) {
+            if (confirm('Bu haberi silmek istediğinizden emin misiniz?')) {
+                CURRENT_PAGE.data.haberler.splice(index, 1);
+                saveHaberler();
+            }
+        }
+        
+        function cancelHaberEdit() {
+            CURRENT_PAGE.data.editingHaberIndex = null;
+            const addContent = document.getElementById('section-haber-add');
+            addContent.innerHTML = renderHaberForm();
+        }
+        
+        async function saveHaber(isEdit) {
+            const haber = {
+                title: document.getElementById('haberTitle').value,
+                excerpt: document.getElementById('haberExcerpt').value,
+                content: document.getElementById('haberContent').value,
+                category: document.getElementById('haberCategory').value,
+                author: document.getElementById('haberAuthor').value,
+                date: new Date(document.getElementById('haberDate').value).toISOString(),
+                popularity: parseInt(document.getElementById('haberPopularity').value) || 50,
+                url: `/haberler/${new Date(document.getElementById('haberDate').value).toISOString().split('T')[0]}-${document.getElementById('haberTitle').value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`
+            };
+            
+            if (isEdit && CURRENT_PAGE.data.editingHaberIndex !== null) {
+                CURRENT_PAGE.data.haberler[CURRENT_PAGE.data.editingHaberIndex] = haber;
+            } else {
+                CURRENT_PAGE.data.haberler.push(haber);
+            }
+            
+            await saveHaberler();
+        }
+        
+        async function saveHaberler() {
+            const messageDiv = document.getElementById('saveMessage');
+            messageDiv.innerHTML = '<div class="success">⏳ Haberler kaydediliyor...</div>';
+            
+            const jsonContent = JSON.stringify(CURRENT_PAGE.data.haberler, null, 2);
+            
+            if (ADMIN_CONFIG.githubToken) {
+                try {
+                    await saveHaberlerToGitHub(jsonContent);
+                    messageDiv.innerHTML = '<div class="success">✅ Haberler başarıyla kaydedildi!</div>';
+                    setTimeout(() => {
+                        loadHaberlerPage();
+                        messageDiv.innerHTML = '';
+                    }, 2000);
+                } catch (error) {
+                    downloadHaberlerFile(jsonContent, messageDiv);
+                }
+            } else {
+                downloadHaberlerFile(jsonContent, messageDiv);
+            }
+        }
+        
+        async function saveHaberlerToGitHub(content) {
+            const path = '_data/haberler.json';
+            
+            const getFileResponse = await fetch(
+                `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}?ref=${ADMIN_CONFIG.githubBranch}`,
+                {
+                    headers: {
+                        'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                }
+            );
+            
+            let sha = null;
+            if (getFileResponse.ok) {
+                const fileData = await getFileResponse.json();
+                sha = fileData.sha;
+            }
+            
+            const updateResponse = await fetch(
+                `https://api.github.com/repos/${ADMIN_CONFIG.githubRepo}/contents/${path}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${ADMIN_CONFIG.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Admin panel: Haberler güncellendi',
+                        content: btoa(unescape(encodeURIComponent(content))),
+                        branch: ADMIN_CONFIG.githubBranch,
+                        sha: sha
+                    })
+                }
+            );
+            
+            if (!updateResponse.ok) {
+                throw new Error('GitHub API hatası');
+            }
+        }
+        
+        function downloadHaberlerFile(content, messageDiv) {
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'haberler.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            messageDiv.innerHTML = '<div class="success">✅ Dosya indirildi! _data/haberler.json dosyasına kopyalayın.</div>';
+        }
     </script>
+    <style>
+        .haber-list-admin {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .haber-item-admin {
+            background: #0f172a;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 2px solid rgba(220, 38, 38, 0.3);
+        }
+        
+        .haber-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .haber-item-header h3 {
+            color: #fca5a5;
+            margin: 0;
+        }
+        
+        .haber-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .haber-item-info {
+            display: flex;
+            gap: 1.5rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .haber-item-excerpt {
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+    </style>
 </body>
 </html>

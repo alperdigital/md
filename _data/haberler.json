@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Örnek Haber Başlığı 1",
+    "date": "2025-01-16T10:00:00",
+    "author": "Ahmet Yılmaz",
+    "category": "Gündem",
+    "popularity": 95,
+    "excerpt": "Bu bir örnek haber açıklamasıdır. Haber içeriği burada yer alacak.",
+    "content": "Bu haberin tam içeriği burada yer alacak. Detaylı bilgiler, görseller ve daha fazlası bu bölümde bulunabilir.\n\n## Haber Detayları\n\nHaber içeriği burada devam ediyor. Kullanıcılar bu bölümde detaylı bilgileri okuyabilirler.",
+    "url": "/haberler/2025-01-16-ornek-haber-1/"
+  },
+  {
+    "title": "Örnek Haber Başlığı 2",
+    "date": "2025-01-15T14:30:00",
+    "author": "Mehmet Demir",
+    "category": "Spor",
+    "popularity": 87,
+    "excerpt": "Spor haberleri burada yer alacak. Güncel gelişmeler ve analizler.",
+    "content": "Spor haberlerinin detaylı içeriği burada yer alacak.\n\n## Spor Analizi\n\nDetaylı analiz ve yorumlar bu bölümde bulunabilir.",
+    "url": "/haberler/2025-01-15-ornek-haber-2/"
+  }
+]
+

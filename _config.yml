@@ -32,6 +32,12 @@ show_excerpts: true
 paginate: 5
 paginate_path: "/sayfa:num/"
 
+# Collections (Haberler)
+collections:
+  haberler:
+    output: true
+    permalink: /haberler/:name/
+
 # Sosyal Medya
 social:
   name: Alper Digital
